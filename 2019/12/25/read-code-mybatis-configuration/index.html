@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang=en>
+<html lang=zh>
 <head>
   <meta charset="utf-8">
   
@@ -24,13 +24,14 @@
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;12&#x2F;25&#x2F;read-code-mybatis-configuration&#x2F;index.html">
 <meta property="og:site_name" content="Allen">
 <meta property="og:description" content="本文将会介绍MyBatis配置文件解析部分的代码解读，从创建一个SqlSessionFactory作为入口，引入MyBatis配置文件的说明。简要说明配置文件中常用标签的用法和说明，根据每个标签，详细介绍MyBatis是如何解析这些标签的。">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2019&#x2F;12&#x2F;25&#x2F;xmlconfigbuilder.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2019&#x2F;12&#x2F;25&#x2F;15772037542887.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2019&#x2F;12&#x2F;25&#x2F;15772038493445.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2019&#x2F;12&#x2F;25&#x2F;15772808581776.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2019&#x2F;12&#x2F;25&#x2F;15772814984148.jpg">
 <meta property="article:published_time" content="2019-12-25T13:57:33.829Z">
-<meta property="article:modified_time" content="2019-12-28T13:11:39.833Z">
+<meta property="article:modified_time" content="2019-12-28T13:15:11.604Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="MyBatis">
 <meta property="article:tag" content="源码">
@@ -73,7 +74,7 @@
 
     <form class="search-form sidebar-form">
         <div class="input-group">
-            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
             <span class="input-group-btn">
                 <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
             </span>
@@ -83,7 +84,7 @@
   <div class="ins-search-mask"></div>
   <div class="ins-search-container">
     <div class="ins-input-wrapper">
-      <input type="text" class="ins-search-input" placeholder="Type something..." x-webkit-speech />
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
       <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
     </div>
     <div class="ins-section-wrapper">
@@ -110,7 +111,7 @@
             
             <i class="icon icon-home-fill"></i>
             
-            <span class="menu-title">Home</span>
+            <span class="menu-title">首页</span>
           </a>
         </li>
         
@@ -120,7 +121,7 @@
             
             <i class="icon icon-archives-fill"></i>
             
-            <span class="menu-title">Archives</span>
+            <span class="menu-title">归档</span>
           </a>
         </li>
         
@@ -130,7 +131,7 @@
             
             <i class="icon icon-folder"></i>
             
-            <span class="menu-title">Categories</span>
+            <span class="menu-title">分类</span>
           </a>
         </li>
         
@@ -140,7 +141,7 @@
             
             <i class="icon icon-tags"></i>
             
-            <span class="menu-title">Tags</span>
+            <span class="menu-title">标签</span>
           </a>
         </li>
         
@@ -150,7 +151,7 @@
             
             <i class="icon icon-book-fill"></i>
             
-            <span class="menu-title">Books</span>
+            <span class="menu-title">书单</span>
           </a>
         </li>
         
@@ -160,7 +161,7 @@
             
             <i class="icon icon-cup-fill"></i>
             
-            <span class="menu-title">About</span>
+            <span class="menu-title">关于</span>
           </a>
         </li>
         
@@ -188,7 +189,7 @@
   <div class="slimContent">
     
       <div class="widget">
-    <h3 class="widget-title">Board</h3>
+    <h3 class="widget-title">公告</h3>
     <div class="widget-body">
         <div id="board">
             <div class="content">
@@ -201,7 +202,7 @@
     
       
   <div class="widget">
-    <h3 class="widget-title">Categories</h3>
+    <h3 class="widget-title">分类</h3>
     <div class="widget-body">
       <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li></ul>
     </div>
@@ -211,7 +212,7 @@
     
       
   <div class="widget">
-    <h3 class="widget-title">Tags</h3>
+    <h3 class="widget-title">标签</h3>
     <div class="widget-body">
       <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li></ul>
     </div>
@@ -221,7 +222,7 @@
     
       
   <div class="widget">
-    <h3 class="widget-title">Tag Cloud</h3>
+    <h3 class="widget-title">标签云</h3>
     <div class="widget-body tagcloud">
       <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a>
     </div>
@@ -230,9 +231,9 @@
     
       
   <div class="widget">
-    <h3 class="widget-title">Archive</h3>
+    <h3 class="widget-title">归档</h3>
     <div class="widget-body">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -240,35 +241,10 @@
     
       
   <div class="widget">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">最新文章</h3>
     <div class="widget-body">
       <ul class="recent-post-list list-unstyled ">
         
-          <li>
-            
-            <div class="item-thumb">
-              <a href="/2019/12/28/hello-world/" class="thumb">
-    
-    
-        <span class="thumb-image thumb-none"></span>
-    
-</a>
-
-            </div>
-            
-            <div class="item-inner">
-              <p class="item-category">
-                
-              </p>
-              <p class="item-title">
-                <a href="/2019/12/28/hello-world/" class="title">Hello World</a>
-              </p>
-              <p class="item-date">
-                <time datetime="2019-12-28T13:06:25.890Z" itemprop="datePublished">2019-12-28</time>
-              </p>
-            </div>
-          </li>
-          
           <li>
             
             <div class="item-thumb">
@@ -308,7 +284,7 @@
 <aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
   <div class="slimContent">
     <nav id="toc" class="article-toc">
-      <h3 class="toc-title">Catalogue</h3>
+      <h3 class="toc-title">文章目录</h3>
       <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建一个SqlSessionFactory的几种方式"><span class="toc-number">1.</span> <span class="toc-text">创建一个SqlSessionFactory的几种方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MyBatis-配置文件的使用"><span class="toc-number">2.</span> <span class="toc-text">MyBatis 配置文件的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MyBatis-配置文件的使用的parse-过程"><span class="toc-number">3.</span> <span class="toc-text">MyBatis 配置文件的使用的parse 过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建-org-w3c-dom-Document-对象"><span class="toc-number">3.1.</span> <span class="toc-text">创建 org.w3c.dom.Document 对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#构造Configuration"><span class="toc-number">3.2.</span> <span class="toc-text">构造Configuration</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#解析properties标签"><span class="toc-number">3.2.1.</span> <span class="toc-text">解析properties标签</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#解析settings标签"><span class="toc-number">3.2.2.</span> <span class="toc-text">解析settings标签</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#解析typeAliases标签"><span class="toc-number">3.2.3.</span> <span class="toc-text">解析typeAliases标签</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#解析environments标签"><span class="toc-number">3.2.4.</span> <span class="toc-text">解析environments标签</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#解析mappers标签"><span class="toc-number">3.2.5.</span> <span class="toc-text">解析mappers标签</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考引用"><span class="toc-number">5.</span> <span class="toc-text">参考引用</span></a></li></ol>
     </nav>
   </div>
@@ -357,13 +333,13 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/12/25/read-code-mybatis-configuration/#comments" class="article-comment-link">Comments</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/12/25/read-code-mybatis-configuration/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 5.4k(words)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 5.4k(字)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 24(minutes)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 24(分)</span>
 	
 
       </div>
@@ -616,25 +592,6 @@
   <nav class="bar bar-footer clearfix" data-stick-bottom>
   <div class="bar-inner">
   
-  <ul class="pager pull-left">
-    
-    <li class="prev">
-      <a href="/2019/12/28/hello-world/" title="Hello World"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;Newer</span></a>
-    </li>
-    
-    
-    
-    <li class="toggle-toc">
-      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="Catalogue" role="button">
-        <span>[&nbsp;</span><span>Catalogue</span>
-        <i class="text-collapsed icon icon-anchor"></i>
-        <i class="text-in icon icon-close"></i>
-        <span>]</span>
-      </a>
-    </li>
-    
-  </ul>
-  
   
   
   <div class="bar-right">
@@ -686,11 +643,11 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Posts',
-            PAGES: 'Pages',
-            CATEGORIES: 'Categories',
-            TAGS: 'Tags',
-            UNTITLED: '(Untitled)',
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
