@@ -18,15 +18,15 @@
   
   
   <title>单元测试:从Junit到Powermock | Lazyallen</title>
-  <meta name="description" content="什么是单元测试单元测试是指，对软件中的最⼩可测试单元在与程序其他部分相隔离的情况下进⾏检查和验证的⼯作，这⾥的最⼩可测试单元通常是指函数或者类。 单元测试的好处单元测试通常由开发⼯程师完成，⼀般会伴随开发代码⼀起递交⾄代码库。单元测试属于最严格的软件测试⼿段，是最接近代码底层实现的验证⼿段，可以在软件开发的早期以最⼩的成本保证局部代码的质量。 如何做好单元测试需要测试哪些东西： 结果是否正确 边界">
+  <meta name="description" content="本文介绍的是Java语言的单元测试框架，分别介绍Junit、Mockito、Powermock三种工具的特点，并附上了用于演示的Demo案例。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="单元测试:从Junit到Powermock">
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;12&#x2F;28&#x2F;ut-share&#x2F;index.html">
 <meta property="og:site_name" content="Allen">
-<meta property="og:description" content="什么是单元测试单元测试是指，对软件中的最⼩可测试单元在与程序其他部分相隔离的情况下进⾏检查和验证的⼯作，这⾥的最⼩可测试单元通常是指函数或者类。 单元测试的好处单元测试通常由开发⼯程师完成，⼀般会伴随开发代码⼀起递交⾄代码库。单元测试属于最严格的软件测试⼿段，是最接近代码底层实现的验证⼿段，可以在软件开发的早期以最⼩的成本保证局部代码的质量。 如何做好单元测试需要测试哪些东西： 结果是否正确 边界">
+<meta property="og:description" content="本文介绍的是Java语言的单元测试框架，分别介绍Junit、Mockito、Powermock三种工具的特点，并附上了用于演示的Demo案例。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-12-28T13:45:55.846Z">
-<meta property="article:modified_time" content="2019-12-28T14:26:53.874Z">
+<meta property="article:modified_time" content="2019-12-28T14:31:12.993Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="UnitTest">
 <meta property="article:tag" content="Java">
@@ -355,7 +355,7 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/12/28/ut-share/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.4k(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.5k(字)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 16(分)</span>
@@ -365,7 +365,12 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h2 id="什么是单元测试"><a href="#什么是单元测试" class="headerlink" title="什么是单元测试"></a>什么是单元测试</h2><p>单元测试是指，对软件中的最⼩可测试单元在与程序其他部分相隔离的情况下进⾏<br>检查和验证的⼯作，这⾥的最⼩可测试单元通常是指函数或者类。</p>
+        <p>本文介绍的是Java语言的单元测试框架，分别介绍Junit、Mockito、Powermock三种工具的特点，并附上了用于演示的Demo案例。</p>
+<a id="more"></a>
+
+
+
+<h2 id="什么是单元测试"><a href="#什么是单元测试" class="headerlink" title="什么是单元测试"></a>什么是单元测试</h2><p>单元测试是指，对软件中的最⼩可测试单元在与程序其他部分相隔离的情况下进⾏<br>检查和验证的⼯作，这⾥的最⼩可测试单元通常是指函数或者类。</p>
 <h2 id="单元测试的好处"><a href="#单元测试的好处" class="headerlink" title="单元测试的好处"></a>单元测试的好处</h2><p>单元测试通常由开发⼯程师完成，⼀般会伴随开发代码⼀起递交⾄代码库。单元测试属于最严格<br>的软件测试⼿段，是最接近代码底层实现的验证⼿段，可以在软件开发的早期以最⼩的成本保证<br>局部代码的质量。</p>
 <h2 id="如何做好单元测试"><a href="#如何做好单元测试" class="headerlink" title="如何做好单元测试"></a>如何做好单元测试</h2><h3 id="需要测试哪些东西："><a href="#需要测试哪些东西：" class="headerlink" title="需要测试哪些东西："></a>需要测试哪些东西：</h3><ul>
 <li>结果是否正确</li>
