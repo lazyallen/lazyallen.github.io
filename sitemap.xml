@@ -2,6 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2019/12/28/hello-world/</loc>
+    
+    <lastmod>2019-12-28T13:12:06.171Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2019/12/25/read-code-mybatis-configuration/</loc>
+    
+    <lastmod>2019-12-28T13:11:39.833Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/about/index.html</loc>
+    
+    <lastmod>2019-12-27T11:00:54.941Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/tags/index.html</loc>
     
     <lastmod>2019-12-27T08:06:35.113Z</lastmod>
@@ -30,23 +51,9 @@
   </url>
   
   <url>
-    <loc>http://yoursite.com/about/index.html</loc>
-    
-    <lastmod>2019-12-27T08:05:18.228Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://yoursite.com/books/index.html</loc>
     
     <lastmod>2019-12-27T08:05:11.731Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2019/12/25/read-code-mybatis-configuration/</loc>
-    
-    <lastmod>2019-12-27T06:35:20.398Z</lastmod>
     
   </url>
   
