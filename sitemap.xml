@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2020/03/29/what-is-ioc/</loc>
+    
+    <lastmod>2020-03-29T15:56:01.499Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2019/12/28/read-code-mybatis-configuration/</loc>
     
     <lastmod>2020-03-17T03:50:24.992Z</lastmod>
