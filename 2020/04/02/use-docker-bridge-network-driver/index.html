@@ -18,17 +18,17 @@
   
   
   <title>浅析Docker 独立容器的网络通信模式 | Lazyallen</title>
-  <meta name="description" content="搭建xxl-job-admin docker container 遇到的疑问很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。在阅读xxl-job的文档时，发现其提供Docker容器部署的方式，于是就在本机装好了Docker环境，实践一番。提前说明一下，本次实验使用的D">
+  <meta name="description" content="很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅析Docker 独立容器的网络通信模式">
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;04&#x2F;02&#x2F;use-docker-bridge-network-driver&#x2F;index.html">
 <meta property="og:site_name" content="Allen">
-<meta property="og:description" content="搭建xxl-job-admin docker container 遇到的疑问很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。在阅读xxl-job的文档时，发现其提供Docker容器部署的方式，于是就在本机装好了Docker环境，实践一番。提前说明一下，本次实验使用的D">
+<meta property="og:description" content="很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2020&#x2F;04&#x2F;02&#x2F;15855902431392.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com&#x2F;2020&#x2F;04&#x2F;02&#x2F;15858380387811.jpg">
 <meta property="article:published_time" content="2020-04-02T14:44:01.887Z">
-<meta property="article:modified_time" content="2020-04-02T14:44:54.824Z">
+<meta property="article:modified_time" content="2020-04-02T14:48:28.939Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="Bridge">
 <meta property="article:tag" content="Network">
@@ -443,7 +443,12 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h2 id="搭建xxl-job-admin-docker-container-遇到的疑问"><a href="#搭建xxl-job-admin-docker-container-遇到的疑问" class="headerlink" title="搭建xxl-job-admin docker container 遇到的疑问"></a>搭建xxl-job-admin docker container 遇到的疑问</h2><p>很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。<br>在阅读xxl-job的文档时，发现其提供Docker容器部署的方式，于是就在本机装好了Docker环境，实践一番。提前说明一下，本次实验使用的Docker版本为19.03.8。<br>xxl-job-admin的容器部署很简单，一共就分两步：</p>
+        <p>很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。</p>
+<a id="more"></a>
+
+
+
+<h2 id="搭建xxl-job-admin-docker-container-遇到的疑问"><a href="#搭建xxl-job-admin-docker-container-遇到的疑问" class="headerlink" title="搭建xxl-job-admin docker container 遇到的疑问"></a>搭建xxl-job-admin docker container 遇到的疑问</h2><p>在阅读xxl-job的文档时，发现其提供Docker容器部署的方式，于是就在本机装好了Docker环境，实践一番。提前说明一下，本次实验使用的Docker版本为19.03.8。<br>xxl-job-admin的容器部署很简单，一共就分两步：</p>
 <ul>
 <li>先部署一个MySql，部署完需要执行好xxl-job相应的SQL脚本</li>
 <li>再部署xxl-job-admin，其中MySql链接指向刚刚部署好的MySql实例</li>
