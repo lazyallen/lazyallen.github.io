@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2020/04/10/jenkins-groovy-script-console/</loc>
+    
+    <lastmod>2020-04-09T18:16:58.602Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2020/04/02/use-docker-bridge-network-driver/</loc>
     
     <lastmod>2020-04-02T14:48:28.939Z</lastmod>
