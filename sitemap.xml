@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2020/07/28/dubbo-event-driven-introduction/</loc>
+    
+    <lastmod>2020-07-27T16:26:16.721Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2020/04/10/jenkins-groovy-script-console/</loc>
     
     <lastmod>2020-04-10T01:57:27.751Z</lastmod>
