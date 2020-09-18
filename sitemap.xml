@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2020/09/18/spring-boot-properties-binder/</loc>
+    
+    <lastmod>2020-09-18T13:05:45.391Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2020/07/28/dubbo-event-driven-introduction/</loc>
     
     <lastmod>2020-07-27T16:26:16.721Z</lastmod>
