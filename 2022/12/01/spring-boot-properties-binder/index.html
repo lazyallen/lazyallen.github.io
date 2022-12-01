@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>当执行“Java -jar springbootapp.jar --server.port=8081” 命令后会发生什么 | Hexo</title>
+  <meta name="description" content="本篇文章的起因是同事问我下面的Jar的启动命令中，- 和 –的参数有什么区别。下意识觉得区别是 在 xxx.jar 之前的参数叫做 VM 参数 ，传入JVM中，而后面的参数 Program 参数，是传入jar中的，对应的就是main(String[] args)中的args数组，但是说到有什么别的明显区别我倒是说不上来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="当执行“Java -jar springbootapp.jar --server.port&#x3D;8081” 命令后会发生什么">
+<meta property="og:url" content="http://yoursite.com/2022/12/01/spring-boot-properties-binder/index.html">
+<meta property="og:site_name" content="Allen">
+<meta property="og:description" content="本篇文章的起因是同事问我下面的Jar的启动命令中，- 和 –的参数有什么区别。下意识觉得区别是 在 xxx.jar 之前的参数叫做 VM 参数 ，传入JVM中，而后面的参数 Program 参数，是传入jar中的，对应的就是main(String[] args)中的args数组，但是说到有什么别的明显区别我倒是说不上来。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-1235-am.png">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-809-pm.png">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-842-pm.png">
+<meta property="article:published_time" content="2022-12-01T08:31:35.052Z">
+<meta property="article:modified_time" content="2022-12-01T08:31:35.052Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-1235-am.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://yoursite.com/2022/12/01/spring-boot-properties-binder/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Allen" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lazyallen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">lazyallen</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">No one</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SPI/">SPI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bridge/" rel="tag">Bridge</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CICD/" rel="tag">CICD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Dubbo/" rel="tag">Dubbo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Groovy/" rel="tag">Groovy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/" rel="tag">IOC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Network/" rel="tag">Network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UnitTest/" rel="tag">UnitTest</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Bridge/" style="font-size: 13px;">Bridge</a> <a href="/tags/CICD/" style="font-size: 13px;">CICD</a> <a href="/tags/Dubbo/" style="font-size: 13px;">Dubbo</a> <a href="/tags/Groovy/" style="font-size: 13px;">Groovy</a> <a href="/tags/IOC/" style="font-size: 13px;">IOC</a> <a href="/tags/Java/" style="font-size: 14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 13px;">Jenkins</a> <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/Network/" style="font-size: 13px;">Network</a> <a href="/tags/Spring-Boot/" style="font-size: 13px;">Spring Boot</a> <a href="/tags/UnitTest/" style="font-size: 13px;">UnitTest</a> <a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" style="font-size: 13px;">任务调度</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 14px;">分布式</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">10</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Docker/">Docker</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/use-docker-bridge-network-driver/" class="title">浅析Docker 独立容器的网络通信模式</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/unit-test-littile-share/" class="title">单元测试:从Junit到Powermock</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/xxl-job-survey/" class="title">XXL-JOB 分布式任务调度平台调研使用分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/what-is-ioc/" class="title">解惑：究竟什么是IOC（控制反转）？</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/jenkins-groovy-script-console/" class="title">Groovy Script Console：如何找出Jenkins中所有授信失效的项目</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.052Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#VM-args-%E5%92%8C-Program-args-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">VM args 和 Program args 有什么区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BE%E4%B8%AA%E6%A0%97%E5%AD%90"><span class="toc-number">2.</span> <span class="toc-text">举个栗子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Think-more%E2%80%A6"><span class="toc-number">3.</span> <span class="toc-text">Think more…</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Boot%E6%98%AF%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86-%E2%80%93args-%E5%8F%82%E6%95%B0%E7%9A%84"><span class="toc-number">4.</span> <span class="toc-text">Spring Boot是如何处理 –args 参数的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tomcat%E7%9A%84port%E6%98%AF%E4%BB%8E%E5%93%AA%E9%87%8C%E8%8E%B7%E5%8F%96%E7%9A%84"><span class="toc-number">5.</span> <span class="toc-text">Tomcat的port是从哪里获取的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Boot%E7%9A%84%E9%85%8D%E7%BD%AE%E7%BB%91%E5%AE%9A"><span class="toc-number">6.</span> <span class="toc-text">Spring Boot的配置绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">8.</span> <span class="toc-text">引用</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-spring-boot-properties-binder" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      当执行“Java -jar springbootapp.jar --server.port=8081” 命令后会发生什么
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/12/01/spring-boot-properties-binder/" class="article-date">
+	  <time datetime="2022-12-01T08:31:35.052Z" itemprop="datePublished">2022-12-01</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2022/12/01/spring-boot-properties-binder/" class="leancloud_visitors"  data-flag-title="当执行“Java -jar springbootapp.jar --server.port=8081” 命令后会发生什么">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/12/01/spring-boot-properties-binder/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.3k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 15(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>本篇文章的起因是同事问我下面的<code>Jar</code>的启动命令中，- 和 –的参数有什么区别。下意识觉得区别是 在 <code>xxx.jar</code> 之前的参数叫做 <code>VM 参数</code> ，传入<code>JVM</code>中，而后面的参数 <code>Program 参数</code>，是传入<code>jar</code>中的，对应的就是<code>main(String[] args)</code>中的args数组，但是说到有什么别的明显区别我倒是说不上来。</p>
+<a id="more"></a>
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xloggc:/logs/governor-service-gc.log -verbose.gc -XX:+PrintGCDateStamps -javaagent:/agent/apm-javaagent.jar -Dskywalking.collector.backend_service=11.11.11.11:1111 -Dskywalking.agent.service_name=uat-mgp-governor-xxxx -Dskywalking.agent.authentication=c8fxxxx17c46bd -jar xxx-microservice.jar --ENV_PROFILE=uat --LIFE_CIRCLE=dev --server.port=11111 --eureka.instance.ip-address=$&#123;NODE_IP&#125; --eureka.instance.non-secure-port=$&#123;NODE_PORT_11111&#125; --jasypt.encryptor.password=xxx -Dsun.net.inetaddr.ttl=3</span><br></pre></td></tr></table></figure>
+
+<p>由此，我心中也有了疑问：</p>
+<ul>
+<li>为什么 <code>Program 参数</code>的写法是 – </li>
+<li>假如都是配置<code>server.port</code>，<code>VM 参数</code> 和 <code>Program 参数</code>的优先级是？</li>
+<li><code>Spring Boot</code>是如何处理两者的呢？</li>
+</ul>
+<h2 id="VM-args-和-Program-args-有什么区别"><a href="#VM-args-和-Program-args-有什么区别" class="headerlink" title="VM args 和 Program args 有什么区别"></a>VM args 和 Program args 有什么区别</h2><p>如何启动一个Java的应用？首先我们可以在<a href="https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html#BABDJJFI" target="_blank" rel="noopener">Oracle的文档</a>中找到答案。</p>
+<blockquote>
+<p>java [options] -jar filename [args]</p>
+<p>options:Command-line options separated by spaces. See Options.</p>
+<p>args: The arguments passed to the main() method separated by spaces.</p>
+</blockquote>
+<p>JVM提供了<code>Standard Options</code>、<code>Non-Standard Options</code> 等6种不同的Options用作不同的场景。其中<code>Standard Options</code>是最常见的Options，例如 <code>-jar filename</code>、<code>-version</code>、<code>-help</code> 等Options。<code>-Dproperty=value</code> 也是<code>Standard Options</code>，文档中的用法解释是：</p>
+<blockquote>
+<p>Sets a system property value. The property variable is a string with no spaces that represents the name of the property. The value variable is a string that represents the value of the property. If value is a string with spaces, then enclose it in quotation marks (for example -Dfoo=”foo bar”).</p>
+</blockquote>
+<blockquote>
+<p>设置一个系统属性值。属性变量是一个没有空格的字符串，代表属性的名称。value变量是一个表示属性值的字符串。如果value是一个带空格的字符串，则用引号括起来（例如-Dfoo=”foo bar”）</p>
+</blockquote>
+<p>对此，明确了一点，类似<code>-Dkey=value</code>的<code>VM参数</code>最后会成为<code>System properties</code>。</p>
+<p>可以看到，在文档中并没有规定 <code>args</code> 的写法，那么为什么在案例中需要在参数前加上<code>--</code>呢。由于启动的是一个<code>Spring Boot</code>项目，尝试去<a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config" target="_blank" rel="noopener">Spring Boot文档</a>中寻找答案。<br>在<code>4.2.2. Accessing Command Line Properties</code>中有说明，<code>Spring Boot</code>的参数均以<code>--</code> 开头，成为 <code>Command Line Properties</code>，作为外部化参数的一种。说到外部化参数，那是不是<code>Spring Boot</code>还有其他的外部化参数？<br><code>Spring Boot</code> 允许外部化配置，以便在不同的环境中使用相同的应用程序代码。可以使用属性文件、 YAML 文件、环境变量和命令行参数来外部化配置，也可以使用<code>@value</code>注释将属性值直接注入 bean，可以通过 Spring 的 <code>Environment</code> 抽象访问属性值，也可以通过<code>@configurationproperties</code>绑定到结构化对象。<br>对于这么多的外部化配置，就会存在相同的属性覆盖的情况，而<code>Spring Boot</code>按照17种不同的外部化配置规约了不同的优先级，这里引用和本篇文章相关的参数。</p>
+<blockquote>
+<p>4.Command line arguments<br>9.Java System properties(System.getProperties()).<br>10.OS environment variables.<br>15.Application properties packaged inside your jar (application.properties and YAML variants).<br>17.Default properties (specified by setting SpringApplication.setDefaultProperties).</p>
+</blockquote>
+<p>到这边答案就出来了，对于<code>java -Dkey=value -jar springboot.jar --key=value</code>这句启动命令：</p>
+<ul>
+<li>前者<code>-Dkey=value</code>会将<code>key:value</code>键值对写入System properties</li>
+<li>后者<code>--key=value</code>属于Spring Boot特定的Command line arguments</li>
+<li>以上两种参数对Spring Boot而言都是外置化参数，通常情况下，Command line arguments 的优先级显然比 System properties 和 配置文件 的优先级高</li>
+</ul>
+<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>我们可以尝试去配置<code>server.port</code>这个参数去验证</p>
+<ul>
+<li>application.properties:server.port=8088</li>
+<li>VM options= -Dserver.port=8081</li>
+<li>Program arguments= –server.port=8082</li>
+</ul>
+<p>启动类如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.player.command.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.ApplicationArguments;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.ApplicationRunner;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.env.Environment;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CommandDemoApplication</span> <span class="keyword">implements</span> <span class="title">ApplicationRunner</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(CommandDemoApplication<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String SERVER_PORT = <span class="string">"server.port"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    Environment env;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//Customizing SpringApplication disable command args</span></span><br><span class="line"><span class="comment">//        SpringApplication app = new SpringApplication(CommandDemoApplication.class);</span></span><br><span class="line"><span class="comment">//        app.setAddCommandLineProperties(false);</span></span><br><span class="line"><span class="comment">//        app.run(args);</span></span><br><span class="line">        SpringApplication.run(CommandDemoApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(ApplicationArguments args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"COMMAND ARGS:args:&#123;&#125;"</span>,args);</span><br><span class="line">        logger.info(<span class="string">"COMMAND ARGS:SourceArgs:&#123;&#125;"</span>,args.getSourceArgs());</span><br><span class="line">        logger.info(<span class="string">"COMMAND ARGS:OptionNames:&#123;&#125;"</span>,args.getOptionNames());</span><br><span class="line">        logger.info(<span class="string">"COMMAND ARGS:NonOptionArgs:&#123;&#125;"</span>,args.getNonOptionArgs());</span><br><span class="line">        logger.info(<span class="string">"COMMAND ARGS:OptionValues for server.port :&#123;&#125;"</span>,args.getOptionValues(SERVER_PORT));</span><br><span class="line">        logger.info(<span class="string">"---------------------------------------"</span>);</span><br><span class="line">        logger.info(<span class="string">"SYSTEM PROPERTIES: server.port:&#123;&#125;"</span>,System.getProperty(SERVER_PORT));</span><br><span class="line">        logger.info(<span class="string">"---------------------------------------"</span>);</span><br><span class="line">        logger.info(<span class="string">"SPRING ENV:server.port:&#123;&#125;"</span>,env.getProperty(SERVER_PORT));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们通过实现<code>ApplicationRunner</code>传入的<code>ApplicationArguments args</code> 就是<code>Program arguments</code>，启动后查看日志，可见最后应用使用的<code>port</code>为<code>8082</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">2020-09-17 23:34:02.392  INFO 6774 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8082 (http) with context path &#39;&#39;</span><br><span class="line">2020-09-17 23:34:02.400  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : Started CommandDemoApplication in 1.988 seconds (JVM running for 2.659)</span><br><span class="line">2020-09-17 23:34:02.401  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : COMMAND ARGS:args:org.springframework.boot.DefaultApplicationArguments@456abb66</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : COMMAND ARGS:SourceArgs:--server.port&#x3D;8082</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : COMMAND ARGS:OptionNames:[server.port]</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : COMMAND ARGS:NonOptionArgs:[]</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : COMMAND ARGS:OptionValues for server.port :[8082]</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : ---------------------------------------</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : SYSTEM PROPERTIES: server.port:8081</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : ---------------------------------------</span><br><span class="line">2020-09-17 23:34:02.403  INFO 6774 --- [           main] c.l.p.c.demo.CommandDemoApplication      : SPRING ENV:server.port:8082</span><br><span class="line">2020-09-17 23:34:06.942  INFO 6774 --- [extShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService &#39;applicationTaskExecutor&#39;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Think-more…"><a href="#Think-more…" class="headerlink" title="Think more…"></a>Think more…</h2><p>如果仔细看开头的案例，会发现<code>-Dsun.net.inetaddr.ttl=3</code>是作为<code>Program arguments</code> 传入应用的，那么这个参数会生效吗？按以上的说法，<code>Spring Boot</code>虽然可以接收这样的<code>Program arguments</code>，但由于其使用的是 <code>-D</code> 的写法，<code>Spring Boot</code>应该是<code>不认识</code>这个参数的。那么如果传入的是<code>--sun.net.inetaddr.ttl=3</code>会不会生效呢，笔者通过实验，发现的确通过获取<code>Spring</code>的环境参数，的确能获取到这个值，但从<code>System properties</code> 中则是null的。在<a href="https://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html#nct" target="_blank" rel="noopener">文档</a>中，对于<code>sun.net.inetaddr.ttl</code>的描述是<code>This is a sun private system property</code>，这是一个私有的<code>System properties</code>，笔者认为虽然能从<code>Spring</code> 的环境参数中获取到这个值，但这个值应该是不会生效的，因为在<code>System properties</code>中这个值依旧是null。</p>
+<p>所以，不能简单的认为<code>--key=value</code>和<code>-Dkey=value</code>是差不多的，在<code>Spring Boot</code>中，除了优先级不同之外，<code>--key=value</code>并不能去变相的代替<code>-Dkey=value</code>，比如说企图在<code>Program arguments</code>中传入类似 <code>--gc=xxx</code> 的GC参数的骚操作肯定是不行的。</p>
+<p>那么问题又来了，为什么<code>--server.port</code>就可以去代替并覆盖<code>-Dserver.port</code>呢？解答这个问题，我们可以尝试去找出，<code>Spring Boot</code>内置<code>web容器</code>中的<code>port</code>是从哪里来的？</p>
+<h2 id="Spring-Boot是如何处理-–args-参数的"><a href="#Spring-Boot是如何处理-–args-参数的" class="headerlink" title="Spring Boot是如何处理 –args 参数的"></a>Spring Boot是如何处理 –args 参数的</h2><p>通过Debug发现入口在<code>SpringApplication</code>的<code>run()</code>方法中，这里我们只展示关键入口和生效步骤。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> ConfigurableApplicationContext <span class="title">run</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="comment">//在启动时，根据Program arguments 构造出DefaultApplicationArguments</span></span><br><span class="line">		ApplicationArguments applicationArguments = <span class="keyword">new</span> DefaultApplicationArguments(args);</span><br><span class="line">		<span class="comment">//准备环境</span></span><br><span class="line">			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);</span><br><span class="line">			configureIgnoreBeanInfo(environment);</span><br><span class="line">			Banner printedBanner = printBanner(environment);</span><br><span class="line">			context = createApplicationContext();</span><br><span class="line">			...</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configurePropertySources</span><span class="params">(ConfigurableEnvironment environment, String[] args)</span> </span>&#123;</span><br><span class="line">		MutablePropertySources sources = environment.getPropertySources();</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span>.defaultProperties != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.defaultProperties.isEmpty()) &#123;</span><br><span class="line">		<span class="comment">//可以看到，defaultProperties是放在最后的，优先级最低</span></span><br><span class="line">			sources.addLast(<span class="keyword">new</span> MapPropertySource(<span class="string">"defaultProperties"</span>, <span class="keyword">this</span>.defaultProperties));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//this.addCommandLineProperties默认为true，但也可以配置为false，这时command line 就会失效</span></span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span>.addCommandLineProperties &amp;&amp; args.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			String name = CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME;</span><br><span class="line">			<span class="keyword">if</span> (sources.contains(name)) &#123;</span><br><span class="line">				PropertySource&lt;?&gt; source = sources.get(name);</span><br><span class="line">				CompositePropertySource composite = <span class="keyword">new</span> CompositePropertySource(name);</span><br><span class="line">				composite.addPropertySource(</span><br><span class="line">						<span class="keyword">new</span> SimpleCommandLinePropertySource(<span class="string">"springApplicationCommandLineArgs"</span>, args));</span><br><span class="line">				composite.addPropertySource(source);</span><br><span class="line">				sources.replace(name, composite);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> &#123;</span><br><span class="line">				sources.addFirst(<span class="keyword">new</span> SimpleCommandLinePropertySource(args));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">SimpleCommandLinePropertySource</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//可以看到SimpleCommandLineArgsParser是用来解析command line 的</span></span><br><span class="line">		<span class="keyword">super</span>(<span class="keyword">new</span> SimpleCommandLineArgsParser().parse(args));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//解析command line的逻辑</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> CommandLineArgs <span class="title">parse</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">		CommandLineArgs commandLineArgs = <span class="keyword">new</span> CommandLineArgs();</span><br><span class="line">		<span class="keyword">for</span> (String arg : args) &#123;</span><br><span class="line">			<span class="keyword">if</span> (arg.startsWith(<span class="string">"--"</span>)) &#123;</span><br><span class="line">				String optionText = arg.substring(<span class="number">2</span>);</span><br><span class="line">				String optionName;</span><br><span class="line">				String optionValue = <span class="keyword">null</span>;</span><br><span class="line">				<span class="keyword">int</span> indexOfEqualsSign = optionText.indexOf(<span class="string">'='</span>);</span><br><span class="line">				<span class="keyword">if</span> (indexOfEqualsSign &gt; -<span class="number">1</span>) &#123;</span><br><span class="line">					optionName = optionText.substring(<span class="number">0</span>, indexOfEqualsSign);</span><br><span class="line">					optionValue = optionText.substring(indexOfEqualsSign + <span class="number">1</span>);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span> &#123;</span><br><span class="line">					optionName = optionText;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> (optionName.isEmpty()) &#123;</span><br><span class="line">					<span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Invalid argument syntax: "</span> + arg);</span><br><span class="line">				&#125;</span><br><span class="line">				commandLineArgs.addOptionArg(optionName, optionValue);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> &#123;</span><br><span class="line">				commandLineArgs.addNonOptionArg(arg);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> commandLineArgs;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>大概流程是，在应用启动时，<code>Spring Boot</code>会根据默认的规则去解析<code>command line</code>，构造成<code>SimpleCommandLinePropertySource</code>，最后加入<code>Spring Environment</code>的<code>propertySources</code> 中。这里的<code>PropertySource</code>很重要，<code>PropertySource</code> 可以简单理解为配置数据源的抽象，上文所讲的各种外部配置都可以看作为数据源。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-1235-am.png" alt="2020-09-18 at 12.35 A"></p>
+<h2 id="Tomcat的port是从哪里获取的"><a href="#Tomcat的port是从哪里获取的" class="headerlink" title="Tomcat的port是从哪里获取的"></a>Tomcat的port是从哪里获取的</h2><p>当启动<code>Spring Web Application</code>时，控制台通常都会打印出当前容器的<code>port</code>端口。例如：<code>o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8082 (http)</code> ，所以可以直接从<code>TomcatWebServer</code>这个类入手。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> WebServerException </span>&#123;</span><br><span class="line">   <span class="comment">//从getPortsDescription(false)获得port </span></span><br><span class="line">	logger.info(<span class="string">"Tomcat initialized with port(s): "</span> + getPortsDescription(<span class="keyword">false</span>));</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 可以看到是从protocolHandler中拿出来的，实际通常是Http11NioProtocol，而它又委托给了AbstractEndpoint</span></span><br><span class="line">        <span class="keyword">if</span> (protocolHandler <span class="keyword">instanceof</span> AbstractProtocol&lt;?&gt;) &#123;</span><br><span class="line">            <span class="keyword">return</span> ((AbstractProtocol&lt;?&gt;) protocolHandler).getPort();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Fall back for custom protocol handlers not based on AbstractProtocol</span></span><br><span class="line">        Object port = getProperty(<span class="string">"port"</span>);</span><br><span class="line">        <span class="keyword">if</span> (port <span class="keyword">instanceof</span> Integer) &#123;</span><br><span class="line">            <span class="keyword">return</span> ((Integer) port).intValue();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Usually means an invalid protocol has been configured</span></span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Server socket port.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port = -<span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> port; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPort</span><span class="params">(<span class="keyword">int</span> port )</span> </span>&#123; <span class="keyword">this</span>.port=port; &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里的<code>port</code>的默认值是<code>-1</code>，在<code>Spring Boot</code>中，当你想维持一个<code>WebApplicationContext</code>，但又不想处理任何连接，就可以通过将<code>port</code>设置为<code>-1</code>去实现。看到这里笔者发现并没有其他地方引用了<code>setPort()</code>这个方法去设置这个值，这里有个技巧是可以在<code>setPort()</code>上打个断点，然后通过调用栈查看调用的上下文。发现这个参数是从<code>ServerProperties</code>中获取的。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-809-pm.png" alt="2020-09-18 at 8.09 P"></p>
+<h2 id="Spring-Boot的配置绑定"><a href="#Spring-Boot的配置绑定" class="headerlink" title="Spring Boot的配置绑定"></a>Spring Boot的配置绑定</h2><p><code>ServerProperties</code> 从字面含义是服务参数配置，这个类存在于<code>Spring Boot autoconfigure</code> 项目中，在这个项目中有许多其他的<code>Properties</code>类。<code>Spring Boot</code>特性之一就是为了简化开发，为此提供了一系列的通用配置给到开发者配置，真正做到开箱即用，在<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#common-application-properties" target="_blank" rel="noopener">Common Application properties</a>可以查看具体配置列表。<br>到这里，我们只要关注的问题就变成了，<code>ServerProperties</code> 中<code>port</code>参数是如何设置的，答案是<code>Spring Boot</code>的配置绑定过程。<code>Spring Boot</code>提供了一系列的参数配置，开发者只需要简单在配置文件中配置一行配置，这行配置的含义就可以生效，肯定其中<code>Spring Boot</code>在背后做了一些事情，而这个过程就是配置绑定。通俗的可以认为，这个过程就是<code>Spring Boot</code>帮你把配置文件或其他外部化配置的参数 一一映射绑定到 对应的<code>Properties</code>中，比如<code>server.port</code>对应的就是<code>ServerProperties</code>的<code>port</code>参数。这里笔者简要分析入口和关键部分逻辑，感兴趣可以自行Debug。<br>首先在<code>ConfigurationProperties</code>的注解上可以猜到入口是<code>ConfigurationPropertiesBindingPostProcessor</code>。<code>ConfigurationPropertiesBindingPostProcessor</code>实现了<code>BeanPostProcessor</code>接口，重写了<code>postProcessBeforeInitialization()</code>，这个方法就是配置绑定的入口。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">postProcessBeforeInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		bind(ConfigurationPropertiesBean.get(<span class="keyword">this</span>.applicationContext, bean, beanName));</span><br><span class="line">		<span class="keyword">return</span> bean;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">private</span> Object <span class="title">bindDataObject</span><span class="params">(ConfigurationPropertyName name, Bindable&lt;?&gt; target, BindHandler handler,</span></span></span><br><span class="line"><span class="function"><span class="params">			Context context, <span class="keyword">boolean</span> allowRecursiveBinding)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (isUnbindableBean(name, target, context)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		Class&lt;?&gt; type = target.getType().resolve(Object<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">		<span class="keyword">if</span> (!allowRecursiveBinding &amp;&amp; context.isBindingDataObject(type)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//函数式接口，延迟执行</span></span><br><span class="line">		DataObjectPropertyBinder propertyBinder = (propertyName, propertyTarget) -&gt; bind(name.append(propertyName),</span><br><span class="line">				propertyTarget, handler, context, <span class="keyword">false</span>, <span class="keyword">false</span>);</span><br><span class="line">		<span class="keyword">return</span> context.withDataObject(type, () -&gt; &#123;</span><br><span class="line">			<span class="keyword">for</span> (DataObjectBinder dataObjectBinder : <span class="keyword">this</span>.dataObjectBinders) &#123;</span><br><span class="line">			     <span class="comment">//  真正执行的逻辑，可以看到上面的函数也传入进来了,这里</span></span><br><span class="line">				Object instance = dataObjectBinder.bind(name, target, context, propertyBinder);</span><br><span class="line">				<span class="keyword">if</span> (instance != <span class="keyword">null</span>) &#123;</span><br><span class="line">					<span class="keyword">return</span> instance;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"><span class="keyword">private</span> &lt;T&gt; <span class="function"><span class="keyword">boolean</span> <span class="title">bind</span><span class="params">(BeanSupplier&lt;T&gt; beanSupplier, DataObjectPropertyBinder propertyBinder,</span></span></span><br><span class="line"><span class="function"><span class="params">			BeanProperty property)</span> </span>&#123;</span><br><span class="line">		String propertyName = property.getName();</span><br><span class="line">		ResolvableType type = property.getType();</span><br><span class="line">		Supplier&lt;Object&gt; value = property.getValue(beanSupplier);</span><br><span class="line">		Annotation[] annotations = property.getAnnotations();</span><br><span class="line">		<span class="comment">//真正执行绑定的逻辑</span></span><br><span class="line">		Object bound = propertyBinder.bindProperty(propertyName,</span><br><span class="line">				Bindable.of(type).withSuppliedValue(value).withAnnotations(annotations));</span><br><span class="line">		<span class="keyword">if</span> (bound == <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (property.isSettable()) &#123;</span><br><span class="line">			property.setValue(beanSupplier, bound);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (value == <span class="keyword">null</span> || !bound.equals(value.get())) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"No setter found for property: "</span> + property.getName());</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>DataObjectBinder</code>接口有两个实现，其中跟进到<code>JavaBeanBinder#bind()</code>方法中，这里的逻辑不通过Debug根本发现不了执行逻辑。通过Debug发现在<code>bind()</code>方法中传入的<code>propertyBinder</code>中间接持有<code>PropertySources</code>参数，走到这边大概能猜到其实配置绑定的数据源就是<code>PropertySources</code>，会根据优先级从<code>PropertySources</code>中设置对应的配置参数。在引用中有一篇更为详细的Debug博客值得阅读。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/09/18/20200918-at-842-pm.png" alt="2020-09-18 at 8.42 P"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过以上，可以确定几点：</p>
+<ul>
+<li><code>Spring Boot</code>在应用启动时会维护一个<code>PropertySources</code> 变量存储所有外部化配置的信息；</li>
+<li>同时在配置绑定的过程中，会从<code>PropertySources</code> 中根据优先级获取对应的配置参数，作为有效的配置，最后绑定在<code>*Properties</code>类的属性。</li>
+<li>内嵌的<code>tomcat</code>容器在启动时，<code>port</code>信息也是从<code>ServerProperties</code>中获取的，理所当然使用的也是根据优先级顺序得到的有效<code>port</code>值。</li>
+</ul>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><ul>
+<li><a href="https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html#BABDJJFI" target="_blank" rel="noopener">Launches a Java application.</a></li>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config" target="_blank" rel="noopener">Externalized Configuration</a></li>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#common-application-properties" target="_blank" rel="noopener">Common Application properties</a></li>
+<li><a href="https://www.xiefayang.com/2019/04/01/Spring%20Boot%20%E9%85%8D%E7%BD%AE%E7%BB%91%E5%AE%9A%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" target="_blank" rel="noopener">Spring Boot 2.0源码解析-配置绑定</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://yoursite.com/2022/12/01/spring-boot-properties-binder/" title="当执行“Java -jar springbootapp.jar --server.port=8081” 命令后会发生什么" target="_blank" rel="external">http://yoursite.com/2022/12/01/spring-boot-properties-binder/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lazyallen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lazyallen" target="_blank"><span class="text-dark">lazyallen</span><small class="ml-1x">No one</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2022/12/01/read-code-mybatis-configuration/" title="深入浅出MyBatis 源码：配置文件解析"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2022/12/01/state-in-code-design-and-service-design/" title="从String类的不可变谈到分布式一致性"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: 'dFjUZtZHQkj381ud5aooTo7U-gzGzoHsz',
+  appKey: '6s4k8JcIPxZ6u9Dwmw4CrLch'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 's1NTgTtFG2fGcypwMSm6Q6Gi-gzGzoHsz',
+    appKey: 'sfruutrdOr8aDHGb96QGfh94',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>

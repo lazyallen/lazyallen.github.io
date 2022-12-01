@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>http://yoursite.com/about/index.html</loc>
+    
+    <lastmod>2022-12-01T11:44:53.034Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/tags/index.html</loc>
+    
+    <lastmod>2022-12-01T08:31:35.062Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/repository/index.html</loc>
+    
+    <lastmod>2022-12-01T08:31:35.061Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/books/index.html</loc>
+    
+    <lastmod>2022-12-01T08:31:35.054Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/categories/index.html</loc>
+    
+    <lastmod>2022-12-01T08:31:35.054Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/state-in-code-design-and-service-design/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.053Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/use-docker-bridge-network-driver/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.053Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/unit-test-littile-share/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.053Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/xxl-job-survey/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.053Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/what-is-ioc/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.053Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/jenkins-groovy-script-console/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.052Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/read-code-mybatis-configuration/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.052Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/spring-boot-properties-binder/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.052Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/java-spi-think/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.051Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2022/12/01/dubbo-event-driven-introduction/</loc>
+    
+    <lastmod>2022-12-01T08:31:35.051Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/404.html</loc>
+    
+    <lastmod>2022-12-01T08:31:35.050Z</lastmod>
+    
+  </url>
+  
+</urlset>

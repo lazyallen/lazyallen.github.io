@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>XXL-JOB 分布式任务调度平台调研使用分析 | Hexo</title>
+  <meta name="description" content="对于XXL-JOB 的使用和功能介绍在其文档中非常清晰，且非常容易上手，本篇文章是把官方文档众多内容简单梳理后而成，目的在于尽可能简单清晰用通俗化的语言把XXL-JOB 工具介绍给一个小白用户。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XXL-JOB 分布式任务调度平台调研使用分析">
+<meta property="og:url" content="http://yoursite.com/2022/12/01/xxl-job-survey/index.html">
+<meta property="og:site_name" content="Allen">
+<meta property="og:description" content="对于XXL-JOB 的使用和功能介绍在其文档中非常清晰，且非常容易上手，本篇文章是把官方文档众多内容简单梳理后而成，目的在于尽可能简单清晰用通俗化的语言把XXL-JOB 工具介绍给一个小白用户。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809285614844.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809286832223.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809789864403.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809767494257.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809789173585.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809790762351.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809814100565.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809819649558.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809823334099.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809827117089.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809829662644.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809831398387.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809831766681.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809831930855.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809832647686.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809830330474.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809837001285.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809836580697.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809839793863.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809841544862.jpg">
+<meta property="article:published_time" content="2022-12-01T08:31:35.053Z">
+<meta property="article:modified_time" content="2022-12-01T08:31:35.053Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="任务调度">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809285614844.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://yoursite.com/2022/12/01/xxl-job-survey/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Allen" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lazyallen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">lazyallen</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">No one</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SPI/">SPI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bridge/" rel="tag">Bridge</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CICD/" rel="tag">CICD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Dubbo/" rel="tag">Dubbo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Groovy/" rel="tag">Groovy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/" rel="tag">IOC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Network/" rel="tag">Network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UnitTest/" rel="tag">UnitTest</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Bridge/" style="font-size: 13px;">Bridge</a> <a href="/tags/CICD/" style="font-size: 13px;">CICD</a> <a href="/tags/Dubbo/" style="font-size: 13px;">Dubbo</a> <a href="/tags/Groovy/" style="font-size: 13px;">Groovy</a> <a href="/tags/IOC/" style="font-size: 13px;">IOC</a> <a href="/tags/Java/" style="font-size: 14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 13px;">Jenkins</a> <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/Network/" style="font-size: 13px;">Network</a> <a href="/tags/Spring-Boot/" style="font-size: 13px;">Spring Boot</a> <a href="/tags/UnitTest/" style="font-size: 13px;">UnitTest</a> <a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" style="font-size: 13px;">任务调度</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 14px;">分布式</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">10</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Docker/">Docker</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/use-docker-bridge-network-driver/" class="title">浅析Docker 独立容器的网络通信模式</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/unit-test-littile-share/" class="title">单元测试:从Junit到Powermock</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/xxl-job-survey/" class="title">XXL-JOB 分布式任务调度平台调研使用分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/what-is-ioc/" class="title">解惑：究竟什么是IOC（控制反转）？</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/jenkins-groovy-script-console/" class="title">Groovy Script Console：如何找出Jenkins中所有授信失效的项目</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.052Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6"><span class="toc-number">1.</span> <span class="toc-text">什么是分布式任务调度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XXL-JOB-%E7%AE%80%E4%BB%8B"><span class="toc-number">2.</span> <span class="toc-text">XXL-JOB 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%AE%E7%82%B9"><span class="toc-number">3.</span> <span class="toc-text">亮点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E9%83%A8%E7%BD%B2%E7%9A%84%E5%87%A0%E4%B8%AA%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.</span> <span class="toc-text">运行部署的几个步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-number">5.</span> <span class="toc-text">架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E4%B8%80%E6%9C%AF%E8%AF%AD"><span class="toc-number">6.</span> <span class="toc-text">统一术语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E6%96%B9%E5%BC%8F%EF%BC%9A%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%86%8C%E5%92%8C%E6%89%8B%E5%8A%A8%E5%BD%95%E5%85%A5"><span class="toc-number">7.</span> <span class="toc-text">注册方式：自动注册和手动录入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E5%8A%A8%E6%B3%A8%E5%86%8C%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="toc-number">7.1.</span> <span class="toc-text">主动注册配置说明：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E5%99%A8%E6%B3%A8%E5%86%8C%E5%92%8C%E6%91%98%E9%99%A4%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="toc-number">7.2.</span> <span class="toc-text">执行器注册和摘除流程说明：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E4%B8%80%E4%B8%AA%E4%BB%BB%E5%8A%A1"><span class="toc-number">8.</span> <span class="toc-text">新建一个任务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%BC%8F%EF%BC%9ABean%E6%A8%A1%E5%BC%8F%E5%92%8CGlue%E6%A8%A1%E5%BC%8F"><span class="toc-number">8.1.</span> <span class="toc-text">运行模式：Bean模式和Glue模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAJOB"><span class="toc-number">8.2.</span> <span class="toc-text">开发一个JOB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%98%E6%96%B9%E6%8F%90%E4%BE%9B%E7%9A%84%E5%87%A0%E7%A7%8D%E7%A4%BA%E4%BE%8B%E4%BB%BB%E5%8A%A1"><span class="toc-number">8.3.</span> <span class="toc-text">官方提供的几种示例任务</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#demoJobHandler%EF%BC%9A%E7%AE%80%E5%8D%95%E7%A4%BA%E4%BE%8B%E4%BB%BB%E5%8A%A1%EF%BC%8C%E4%BB%BB%E5%8A%A1%E5%86%85%E9%83%A8%E6%A8%A1%E6%8B%9F%E8%80%97%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%80%BB%E8%BE%91%EF%BC%8C%E7%94%A8%E6%88%B7%E5%8F%AF%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8CRolling-Log%E7%AD%89%E5%8A%9F%E8%83%BD%EF%BC%9B"><span class="toc-number">8.3.1.</span> <span class="toc-text">demoJobHandler：简单示例任务，任务内部模拟耗时任务逻辑，用户可在线体验Rolling Log等功能；</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#shardingJobHandler%EF%BC%9A%E5%88%86%E7%89%87%E7%A4%BA%E4%BE%8B%E4%BB%BB%E5%8A%A1%EF%BC%8C%E4%BB%BB%E5%8A%A1%E5%86%85%E9%83%A8%E6%A8%A1%E6%8B%9F%E5%A4%84%E7%90%86%E5%88%86%E7%89%87%E5%8F%82%E6%95%B0%EF%BC%8C%E5%8F%AF%E5%8F%82%E8%80%83%E7%86%9F%E6%82%89%E5%88%86%E7%89%87%E4%BB%BB%E5%8A%A1%EF%BC%9B"><span class="toc-number">8.3.2.</span> <span class="toc-text">shardingJobHandler：分片示例任务，任务内部模拟处理分片参数，可参考熟悉分片任务；</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#httpJobHandler%EF%BC%9A%E9%80%9A%E7%94%A8HTTP%E4%BB%BB%E5%8A%A1Handler%EF%BC%9B%E4%B8%9A%E5%8A%A1%E6%96%B9%E5%8F%AA%E9%9C%80%E8%A6%81%E6%8F%90%E4%BE%9BHTTP%E9%93%BE%E6%8E%A5%E5%8D%B3%E5%8F%AF%EF%BC%8C%E4%B8%8D%E9%99%90%E5%88%B6%E8%AF%AD%E8%A8%80%E3%80%81%E5%B9%B3%E5%8F%B0%EF%BC%9B"><span class="toc-number">8.3.3.</span> <span class="toc-text">httpJobHandler：通用HTTP任务Handler；业务方只需要提供HTTP链接即可，不限制语言、平台；</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#commandJobHandler%EF%BC%9A%E9%80%9A%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%BB%BB%E5%8A%A1Handler%EF%BC%9B%E4%B8%9A%E5%8A%A1%E6%96%B9%E5%8F%AA%E9%9C%80%E8%A6%81%E6%8F%90%E4%BE%9B%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8D%B3%E5%8F%AF%EF%BC%9B%E5%A6%82-%E2%80%9Cpwd%E2%80%9D%E5%91%BD%E4%BB%A4%EF%BC%9B"><span class="toc-number">8.3.4.</span> <span class="toc-text">commandJobHandler：通用命令行任务Handler；业务方只需要提供命令行即可；如 “pwd”命令；</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5"><span class="toc-number">8.4.</span> <span class="toc-text">路由策略</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB%E5%92%8C%E5%BF%99%E7%A2%8C%E8%BD%AC%E7%A7%BB"><span class="toc-number">8.4.1.</span> <span class="toc-text">故障转移和忙碌转移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E7%89%87%E5%B9%BF%E6%92%AD"><span class="toc-number">8.4.2.</span> <span class="toc-text">分片广播</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%BB%E5%A1%9E%E5%A4%84%E7%90%86%E7%AD%96%E7%95%A5"><span class="toc-number">8.5.</span> <span class="toc-text">阻塞处理策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E8%A7%84%E5%88%99"><span class="toc-number">8.6.</span> <span class="toc-text">触发规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81"><span class="toc-number">8.7.</span> <span class="toc-text">任务状态</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E5%BA%A6%E6%97%A5%E5%BF%97%E5%92%8C%E4%BB%BB%E5%8A%A1%E6%97%A5%E5%BF%97"><span class="toc-number">9.</span> <span class="toc-text">调度日志和任务日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86"><span class="toc-number">10.</span> <span class="toc-text">用户管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%89%8D%E5%8F%91%E7%8E%B0%E7%9A%84%E5%87%A0%E4%B8%AA%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">11.</span> <span class="toc-text">目前发现的几个小问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A5%E8%A1%A8%E9%A1%B5%E9%9D%A2%E7%BB%9F%E8%AE%A1%E7%AE%80%E5%8D%95"><span class="toc-number">11.1.</span> <span class="toc-text">报表页面统计简单</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%94%A8%E6%88%B7%E7%9A%84%E6%8A%A5%E8%A1%A8%E9%A1%B5%E9%9D%A2%E6%95%B0%E6%8D%AE%E6%B2%A1%E6%9C%89%E9%9A%94%E7%A6%BB"><span class="toc-number">11.2.</span> <span class="toc-text">不同用户的报表页面数据没有隔离</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E8%BE%93%E5%85%A5%E6%89%A7%E8%A1%8C%E5%99%A8%E6%80%BB%E6%98%BE%E7%A4%BAOnline"><span class="toc-number">11.3.</span> <span class="toc-text">手动输入执行器总显示Online</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E8%A6%86%E7%9B%96%E9%9C%80%E6%B1%82"><span class="toc-number">12.</span> <span class="toc-text">是否可以覆盖需求</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-xxl-job-survey" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      XXL-JOB 分布式任务调度平台调研使用分析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/12/01/xxl-job-survey/" class="article-date">
+	  <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a>, <a class="article-tag-link-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2022/12/01/xxl-job-survey/" class="leancloud_visitors"  data-flag-title="XXL-JOB 分布式任务调度平台调研使用分析">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/12/01/xxl-job-survey/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 4.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 18(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>对于XXL-JOB 的使用和功能介绍在其<a href="https://www.xuxueli.com/xxl-job" target="_blank" rel="noopener">文档</a>中非常清晰，且非常容易上手，本篇文章是把官方文档众多内容简单梳理后而成，目的在于<strong>尽可能</strong>简单清晰用通俗化的语言把XXL-JOB 工具介绍给一个小白用户。</p>
+<a id="more"></a>
+
+<h2 id="什么是分布式任务调度"><a href="#什么是分布式任务调度" class="headerlink" title="什么是分布式任务调度"></a>什么是分布式任务调度</h2><p>在日常开发中，可能会碰到类似「每天定时推送一些业务数据通知到用户」的场景，这时能想到最简单的解决方案时用JDK定时任务的Timer。但随业务发展，单 体应用不仅有挂掉的风险，且不一定能Hold大量的业务数据。这时最简单的方法就是加机器（横向扩展），这也带来了很多问题。</p>
+<ul>
+<li>分布式：怎么保证任务正确的执行：比如5台机器，同一时间只要1台机器执行</li>
+<li>故障处理：机器在执行任务的时候挂掉了怎么办？</li>
+<li>任务管理：如果有几千个任务该如何管理？</li>
+<li>日志监控：怎么知道任务的执行情况？<br>等等多个问题。<br>而分布式调度平台的产生就是去解决以上问题。目前比较知名的几个分布式任务调度平台有：Quartz、ElasticJob、LTS(Light Task Scheduler)、XXL-JOB.<h2 id="XXL-JOB-简介"><a href="#XXL-JOB-简介" class="headerlink" title="XXL-JOB 简介"></a>XXL-JOB 简介</h2><blockquote>
+<p>XXL-JOB是一个分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。<br>该工具的开发者是来自美团点评的许雪里，XXL是作者名的缩写而成。</p>
+</blockquote>
+<h2 id="亮点"><a href="#亮点" class="headerlink" title="亮点"></a>亮点</h2>文档介绍几十个特性，这里我摘选几个比较重要的亮点特性：</li>
+<li>中心化架构：和ElasticJob和LTS去中心化架构不同，XXL-JOB是中心化架构，由调度中心和执行器组成。</li>
+<li>后台管理WEB：管理页面可以管理执行器、CRUD任务、查看调度日志和任务日志</li>
+<li>Rolling实时日志：支持在线查看调度结果，并且支持以Rolling方式实时查看执行器输出的完整的执行日志；</li>
+<li>GLUE：提供Web IDE，支持在线开发任务逻辑代码，动态发布，实时编译生效，省略部署上线的过程。支持30个版本的历史版本回溯。</li>
+<li>任务依赖：支持配置子任务依赖，当父任务执行结束且执行成功后将会主动触发一次子任务的执行, 多个子任务用逗号分隔；</li>
+<li>路由策略：执行器集群部署时提供丰富的路由策略，包括：第一个、最后一个、轮询、随机、一致性HASH、最不经常使用、最近最久未使用、故障转移、忙碌转移等；</li>
+<li>阻塞处理策略：调度过于密集执行器来不及处理时的处理策略，策略包括：单机串行（默认）、丢弃后续调度、覆盖之前调度；</li>
+<li>全异步：任务调度流程全异步化设计实现，如异步调度、异步运行、异步回调等，有效对密集调度进行流量削峰，理论上支持任意时长任务的运行；<h2 id="运行部署的几个步骤"><a href="#运行部署的几个步骤" class="headerlink" title="运行部署的几个步骤"></a>运行部署的几个步骤</h2>文档中的「<a href="https://www.xuxueli.com/xxl-job/#%E4%BA%8C%E3%80%81%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8" target="_blank" rel="noopener">快速入门</a>」已经非常具体了。大概分为</li>
+</ul>
+<ol>
+<li>初始化调度数据库</li>
+<li>部署调度中心集群：xxl-job-admin</li>
+<li>部署执行器集群：xxl-job-core。可以直接使用，也可以将现有项目改造为执行器，只要引入<code>xxl-job-core</code>的Maven依赖即可。</li>
+<li>登录调度中心访问地址，管理配置。<br>注意：本篇运行部署的版本是v2.12<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809285614844.jpg" alt="-w450"><br>从架构图上理解，XXL-JOB分为两个部分，同时也对应两个项目。</li>
+</ol>
+<ul>
+<li>调度中心（xxl-job-admin）<ul>
+<li>执行器管理</li>
+<li>任务管理</li>
+<li>日志管理</li>
+<li>其他</li>
+</ul>
+</li>
+<li>执行器（xxl-job-core）<ul>
+<li>主动注册</li>
+<li>任务执行</li>
+<li>任务回调</li>
+<li>日志服务<br>同时，从架构图也可以看出来基本的工作执行流程如下：<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809286832223.jpg" alt="-w450"></li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>任务执行器根据配置的调度中心的地址，自动注册到调度中心</li>
+<li>达到任务触发条件，调度中心下发任务</li>
+<li>执行器基于线程池执行任务，并把执行结果放入内存队列中、把执行日志写入日志文件中</li>
+<li>执行器的回调线程消费内存队列中的执行结果，主动上报给调度中心</li>
+<li>当用户在调度中心查看任务日志，调度中心请求任务执行器，任务执行器读取任务日志文件并返回日志详情<h2 id="统一术语"><a href="#统一术语" class="headerlink" title="统一术语"></a>统一术语</h2></li>
+</ol>
+<ul>
+<li>调度中心：负责管理、调度、监控任务的全周期。可以理解为所有执行器的老大，所有的执行器都有老大调遣；</li>
+<li>执行器：可以理解为具体干活的一类小弟，小弟要主动去认老大（自动注册），老大发出指令后执行（任务执行），执行后反馈任务执行结果（回调线程），同时也提供给老大查询任务执行过程记录的能力（日志服务）；</li>
+<li>任务：一件事情，由一个或一组执行器执行；</li>
+<li>调度：老大交给小弟办一件事的具体描述；<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809789864403.jpg" alt="-w450"></li>
+</ul>
+<h2 id="注册方式：自动注册和手动录入"><a href="#注册方式：自动注册和手动录入" class="headerlink" title="注册方式：自动注册和手动录入"></a>注册方式：自动注册和手动录入</h2><p>在调度中心的执行器管理页面，提供了两种执行器注册方式。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809767494257.jpg" alt="-w450"><br>这里需要明白4个字段的含义：</p>
+<ul>
+<li>执行器：这里的执行器实际指的是「执行器集群」的概念，并非单个机器节点，同时这也是执行任务的基本单位，也就是说调度中心并不能「直接」指定某台机器去执行任务，但可以「间接」通过定义任务路由的方式实现；</li>
+<li>AppName:「执行器集群」的唯一标志，每个执行器机器集群的唯一标示, 任务注册以 “执行器” 为最小粒度进行注册; 每个任务通过其绑定的执行器可感知对应的执行器机器列表;</li>
+<li>注册方式：分为自动和手动，如果是自动就不用填机器地址，同时执行器配置要必填调度中心地址和AppName用于主动注册；如果是手动，需要填写机器地址；</li>
+<li>机器地址：具体执行任务的机器节点。一个AppName维护着包含多个机器节点的列表；<br>无论是自动注册还是手动注册，都需要用户在执行器管理页面声明一个执行器，这里我们着重说一下自动注册的配置和流程。<h3 id="主动注册配置说明："><a href="#主动注册配置说明：" class="headerlink" title="主动注册配置说明："></a>主动注册配置说明：</h3></li>
+<li>首先需要在执行器管理页面新建一个注册方式为「自动注册」的执行器；</li>
+<li>部署执行器时需要填写<code>xxl.job.admin.addresses</code>和<code>xxl.job.executor.appname</code>两个配置字段表明开启自动注册，这两个字段时选填的，如果为空则表明关闭自动注册；<h3 id="执行器注册和摘除流程说明："><a href="#执行器注册和摘除流程说明：" class="headerlink" title="执行器注册和摘除流程说明："></a>执行器注册和摘除流程说明：</h3>任务注册的心跳周期Beat默认为30s。</li>
+<li>执行器节点启动之后会以一倍Beat进行执行器注册, 调度中心以一倍Beat进行动态任务发现; </li>
+<li>“执行器” 在进行任务注册时将会周期性维护一条注册记录，即机器地址和AppName的绑定关系; “调度中心” 从而可以动态感知每个AppName在线的机器列表，具体信息见<code>xxl_job_registry</code>表。</li>
+</ul>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809789173585.jpg" alt="-w450"></p>
+<ul>
+<li>执行器摘除分为主动摘除和过期摘除：<ul>
+<li>过期摘除：注册信息的失效时间为三倍Beat，也就是90s，执行器销毁时，将会主动上报调度中心并摘除对应的执行器机器信息，提高心跳注册的实时性；</li>
+<li>主动摘除：在WEB页面主动删除执行器。<h2 id="新建一个任务"><a href="#新建一个任务" class="headerlink" title="新建一个任务"></a>新建一个任务</h2>新建好执行器后，接下来就是定义一个任务分配给执行器执行。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809790762351.jpg" alt="-w450"><h3 id="运行模式：Bean模式和Glue模式"><a href="#运行模式：Bean模式和Glue模式" class="headerlink" title="运行模式：Bean模式和Glue模式"></a>运行模式：Bean模式和Glue模式</h3>如果把业务代码比作奔驰在路上的跑车，如果我们要给轮胎加一个零件，有两种方案，一是把车停下来把零件加上去后再启动，这就是Bean模式，二是不停车，车在跑的同时直接在论坛上把零件「粘」上去，这也是Glue（中文含义就是胶水）的意义来源。<br>两者区别：</li>
+</ul>
+</li>
+<li>Bean模式的业务代码保存在执行器，Glue模式的业务代码保存在调度中心，运行在执行器；</li>
+<li>Bean模式更新代码需呀停机，Glue模式支持通过Web IDE在线更新，实时编译和生效；</li>
+<li>Glue模式提供版本回滚功能，Glue模式每次执行前都要判断为最新版本，否则需要冲洗构造任务线程；</li>
+<li>Glue模式支持跨语言，Shell、Python、Nodejs</li>
+</ul>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809814100565.jpg" alt="-w450"><br>Glue Java 模式是通过 GLUE Class loader 加载源码的方式，加载源码可以注入 spring 当中其他的一些 server 组件，很方便的接触 spring 其他服务。你修改的时候，下次任务执行，会是你当前这份源码重新实例化，注入一些新的服务进行执行。</p>
+<h3 id="开发一个JOB"><a href="#开发一个JOB" class="headerlink" title="开发一个JOB"></a>开发一个JOB</h3><p>类级别：在XXL-JOB中，所以的JOB都需要继承<code>IJobHandler</code>并重写<code>execute</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">IJobHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">/** success */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> ReturnT&lt;String&gt; SUCCESS = <span class="keyword">new</span> ReturnT&lt;String&gt;(<span class="number">200</span>, <span class="keyword">null</span>);</span><br><span class="line">	<span class="comment">/** fail */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> ReturnT&lt;String&gt; FAIL = <span class="keyword">new</span> ReturnT&lt;String&gt;(<span class="number">500</span>, <span class="keyword">null</span>);</span><br><span class="line">	<span class="comment">/** fail timeout */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> ReturnT&lt;String&gt; FAIL_TIMEOUT = <span class="keyword">new</span> ReturnT&lt;String&gt;(<span class="number">502</span>, <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * execute handler, invoked when executor receives a scheduling request</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> param</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> ReturnT&lt;String&gt; <span class="title">execute</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * init handler, invoked when JobThread init</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> InvocationTargetException, IllegalAccessException </span>&#123;</span><br><span class="line">		<span class="comment">// do something</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * destroy handler, invoked when JobThread destroy</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> <span class="keyword">throws</span> InvocationTargetException, IllegalAccessException </span>&#123;</span><br><span class="line">		<span class="comment">// do something</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法级别：前提是Spring容器，直接在方法上添加<code>@XxlJob(&quot;demoJobHandler&quot;)</code>就行。<br><strong>无论是类级别还是方法级别，执行方式格式要求为 <code>public ReturnT&lt;String&gt; execute(String param)</code>。</strong></p>
+<h3 id="官方提供的几种示例任务"><a href="#官方提供的几种示例任务" class="headerlink" title="官方提供的几种示例任务"></a>官方提供的几种示例任务</h3><h4 id="demoJobHandler：简单示例任务，任务内部模拟耗时任务逻辑，用户可在线体验Rolling-Log等功能；"><a href="#demoJobHandler：简单示例任务，任务内部模拟耗时任务逻辑，用户可在线体验Rolling-Log等功能；" class="headerlink" title="demoJobHandler：简单示例任务，任务内部模拟耗时任务逻辑，用户可在线体验Rolling Log等功能；"></a>demoJobHandler：简单示例任务，任务内部模拟耗时任务逻辑，用户可在线体验Rolling Log等功能；</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 1、简单任务示例（Bean模式）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@XxlJob</span>(<span class="string">"demoJobHandler"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">demoJobHandler</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        XxlJobLogger.log(<span class="string">"XXL-JOB, Hello World."</span>+param);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            XxlJobLogger.log(<span class="string">"beat at:"</span> + i);</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">2</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ReturnT.SUCCESS;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="shardingJobHandler：分片示例任务，任务内部模拟处理分片参数，可参考熟悉分片任务；"><a href="#shardingJobHandler：分片示例任务，任务内部模拟处理分片参数，可参考熟悉分片任务；" class="headerlink" title="shardingJobHandler：分片示例任务，任务内部模拟处理分片参数，可参考熟悉分片任务；"></a>shardingJobHandler：分片示例任务，任务内部模拟处理分片参数，可参考熟悉分片任务；</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 2、分片广播任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@XxlJob</span>(<span class="string">"shardingJobHandler"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">shardingJobHandler</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 分片参数</span></span><br><span class="line">        ShardingUtil.ShardingVO shardingVO = ShardingUtil.getShardingVo();</span><br><span class="line">        XxlJobLogger.log(<span class="string">"分片参数：当前分片序号 = &#123;&#125;, 总分片数 = &#123;&#125;"</span>, shardingVO.getIndex(), shardingVO.getTotal());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 业务逻辑</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; shardingVO.getTotal(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i == shardingVO.getIndex()) &#123;</span><br><span class="line">                XxlJobLogger.log(<span class="string">"第 &#123;&#125; 片, 命中分片开始处理"</span>, i);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                XxlJobLogger.log(<span class="string">"第 &#123;&#125; 片, 忽略"</span>, i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> ReturnT.SUCCESS;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="httpJobHandler：通用HTTP任务Handler；业务方只需要提供HTTP链接即可，不限制语言、平台；"><a href="#httpJobHandler：通用HTTP任务Handler；业务方只需要提供HTTP链接即可，不限制语言、平台；" class="headerlink" title="httpJobHandler：通用HTTP任务Handler；业务方只需要提供HTTP链接即可，不限制语言、平台；"></a>httpJobHandler：通用HTTP任务Handler；业务方只需要提供HTTP链接即可，不限制语言、平台；</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 4、跨平台Http任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@XxlJob</span>(<span class="string">"httpJobHandler"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">httpJobHandler</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// request</span></span><br><span class="line">        HttpURLConnection connection = <span class="keyword">null</span>;</span><br><span class="line">        BufferedReader bufferedReader = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// connection</span></span><br><span class="line">            URL realUrl = <span class="keyword">new</span> URL(param);</span><br><span class="line">            connection = (HttpURLConnection) realUrl.openConnection();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// connection setting</span></span><br><span class="line">            connection.setRequestMethod(<span class="string">"GET"</span>);</span><br><span class="line">            connection.setDoOutput(<span class="keyword">true</span>);</span><br><span class="line">            connection.setDoInput(<span class="keyword">true</span>);</span><br><span class="line">            connection.setUseCaches(<span class="keyword">false</span>);</span><br><span class="line">            connection.setReadTimeout(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">            connection.setConnectTimeout(<span class="number">3</span> * <span class="number">1000</span>);</span><br><span class="line">            connection.setRequestProperty(<span class="string">"connection"</span>, <span class="string">"Keep-Alive"</span>);</span><br><span class="line">            connection.setRequestProperty(<span class="string">"Content-Type"</span>, <span class="string">"application/json;charset=UTF-8"</span>);</span><br><span class="line">            connection.setRequestProperty(<span class="string">"Accept-Charset"</span>, <span class="string">"application/json;charset=UTF-8"</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// do connection</span></span><br><span class="line">            connection.connect();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//Map&lt;String, List&lt;String&gt;&gt; map = connection.getHeaderFields();</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// valid StatusCode</span></span><br><span class="line">            <span class="keyword">int</span> statusCode = connection.getResponseCode();</span><br><span class="line">            <span class="keyword">if</span> (statusCode != <span class="number">200</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Http Request StatusCode("</span> + statusCode + <span class="string">") Invalid."</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// result</span></span><br><span class="line">            bufferedReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(connection.getInputStream(), <span class="string">"UTF-8"</span>));</span><br><span class="line">            StringBuilder result = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">            String line;</span><br><span class="line">            <span class="keyword">while</span> ((line = bufferedReader.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                result.append(line);</span><br><span class="line">            &#125;</span><br><span class="line">            String responseMsg = result.toString();</span><br><span class="line"></span><br><span class="line">            XxlJobLogger.log(responseMsg);</span><br><span class="line">            <span class="keyword">return</span> ReturnT.SUCCESS;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            XxlJobLogger.log(e);</span><br><span class="line">            <span class="keyword">return</span> ReturnT.FAIL;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (bufferedReader != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    bufferedReader.close();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (connection != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    connection.disconnect();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e2) &#123;</span><br><span class="line">                XxlJobLogger.log(e2);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="commandJobHandler：通用命令行任务Handler；业务方只需要提供命令行即可；如-“pwd”命令；"><a href="#commandJobHandler：通用命令行任务Handler；业务方只需要提供命令行即可；如-“pwd”命令；" class="headerlink" title="commandJobHandler：通用命令行任务Handler；业务方只需要提供命令行即可；如 “pwd”命令；"></a>commandJobHandler：通用命令行任务Handler；业务方只需要提供命令行即可；如 “pwd”命令；</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 3、命令行任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@XxlJob</span>(<span class="string">"commandJobHandler"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">commandJobHandler</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String command = param;</span><br><span class="line">        <span class="keyword">int</span> exitValue = -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        BufferedReader bufferedReader = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// command process</span></span><br><span class="line">            Process process = Runtime.getRuntime().exec(command);</span><br><span class="line">            BufferedInputStream bufferedInputStream = <span class="keyword">new</span> BufferedInputStream(process.getInputStream());</span><br><span class="line">            bufferedReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(bufferedInputStream));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// command log</span></span><br><span class="line">            String line;</span><br><span class="line">            <span class="keyword">while</span> ((line = bufferedReader.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                XxlJobLogger.log(line);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// command exit</span></span><br><span class="line">            process.waitFor();</span><br><span class="line">            exitValue = process.exitValue();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            XxlJobLogger.log(e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (bufferedReader != <span class="keyword">null</span>) &#123;</span><br><span class="line">                bufferedReader.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (exitValue == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> IJobHandler.SUCCESS;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ReturnT&lt;String&gt;(IJobHandler.FAIL.getCode(), <span class="string">"command exit value("</span>+exitValue+<span class="string">") is failed"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="路由策略"><a href="#路由策略" class="headerlink" title="路由策略"></a>路由策略</h3><p>当执行器集群部署时，提供丰富的路由策略，包括；</p>
+<ul>
+<li>FIRST（第一个）：固定选择第一个机器；</li>
+<li>LAST（最后一个）：固定选择最后一个机器；</li>
+<li>ROUND（轮询）</li>
+<li>RANDOM（随机）：随机选择在线的机器；</li>
+<li>CONSISTENT_HASH（一致性HASH）：每个任务按照Hash算法固定选择某一台机器，且所有任务均匀散列在不同机器上。</li>
+<li>LEAST_FREQUENTLY_USED（最不经常使用）：使用频率最低的机器优先被选举；</li>
+<li>LEAST_RECENTLY_USED（最近最久未使用）：最久为使用的机器优先被选举；</li>
+<li>FAILOVER（故障转移）：按照顺序依次进行心跳检测，第一个心跳检测成功的机器选定为目标执行器并发起调度；</li>
+<li>BUSYOVER（忙碌转移）：按照顺序依次进行空闲检测，第一个空闲检测成功的机器选定为目标执行器并发起调度；</li>
+<li>SHARDING_BROADCAST(分片广播)：广播触发对应集群中所有机器执行一次任务，同时系统自动传递分片参数；可根据分片参数开发分片任务；</li>
+</ul>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809819649558.jpg" alt="-w450"><br>从任务触发到任务执行在调度中心阶段有几个步骤</p>
+<ul>
+<li>匹配执行器</li>
+<li>从注册中心加载在线机器节点列表</li>
+<li>根据路由策略去匹配一组机器</li>
+<li>通知这个机器去执行任务<br>基本前面几个路由策略比较容易理解，这里我们着重说一下后面三个路由策略。<h4 id="故障转移和忙碌转移"><a href="#故障转移和忙碌转移" class="headerlink" title="故障转移和忙碌转移"></a>故障转移和忙碌转移</h4><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809823334099.jpg" alt="-w450"><br>调度器在调度时会请求执行器是否处于处于故障或者忙碌状态，对应着<code>ExecutorBiz</code>的开放出来的两个方法。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ExecutorBiz</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * beat</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">beat</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * idle beat</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> jobId</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">idleBeat</span><span class="params">(<span class="keyword">int</span> jobId)</span></span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="分片广播"><a href="#分片广播" class="headerlink" title="分片广播"></a>分片广播</h4><p>有时候一台机器处理不够，需要多台机器分片处理。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809827117089.jpg" alt="-w450"><br>可以参照上面的分片广播任务查看如何使用。</p>
+<h3 id="阻塞处理策略"><a href="#阻塞处理策略" class="headerlink" title="阻塞处理策略"></a>阻塞处理策略</h3><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809829662644.jpg" alt="-w450"></p>
+<p>当我们有一些耗时任务，触发的频率超过它的执行器所执行的那些速度的时候，如上图，红色的触发请求进来，但是前面的还在堆积着执行，这时候怎么办？第一条就是默认的单机串行，会把请求入队列，等前面的执行完了之后，挨个把所有的触发的任务全都执行掉。第二个就是丢弃后续的调度，红色的进来了，发现前面已经有了，或者是当前已经 JOB 运行了，直接把后面的标记失败，不进行后面的执行了。最后一个就是覆盖之前调度的，它发现前面队列里面的数据或者任务执行的情况下，把队列清空，把清空的数据全都标记失败，然后把执行的 JOB 也标记失败，让自己来运行。</p>
+<h3 id="触发规则"><a href="#触发规则" class="headerlink" title="触发规则"></a>触发规则</h3><p>现在提供的触发规则主要有 3 种。</p>
+<ul>
+<li>第一种是 Cron 表达式，每一个任务需要配一个 Cron 表达式。</li>
+<li>第二种是任务依赖，你可以为每一个任务配置一个子任务，当副任务执行完成之后，可以触发子任务，这样关联的方式进行触发执行。</li>
+<li>第三种就是事件触发，其实就是类似于 Mq 的场景，代码里面有一个业务逻辑，触发了一个任务执行。<h3 id="任务状态"><a href="#任务状态" class="headerlink" title="任务状态"></a>任务状态</h3></li>
+<li>成功（SUCCESS）</li>
+<li>失败 （FAIL）</li>
+<li>超时 （FAIL_TIMEOUT）</li>
+<li>进行中<h2 id="调度日志和任务日志"><a href="#调度日志和任务日志" class="headerlink" title="调度日志和任务日志"></a>调度日志和任务日志</h2>调度日志：调度平台调度任务的日志，如果任务失败会保留出失败的日志。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809831398387.jpg" alt="-w450"><br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809831766681.jpg" alt="-w450"><br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809831930855.jpg" alt="-w450"></li>
+</ul>
+<p>任务日志：具体任务执行的日志，下面那张图是一个日志页面展示（貌似是读不到日志），真实应该展示的应该是下面的日志内容。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809832647686.jpg" alt="-w450"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">2020-02-05 23:29:54 [com.xxl.job.core.thread.JobThread#run]-[124]-[Thread-6] &lt;br&gt;----------- xxl-job job execute start -----------&lt;br&gt;----------- Param:</span><br><span class="line">2020-02-05 23:29:54 [com.xuxueli.executor.sample.frameless.jobhandler.ShardingJobHandler#execute]-[20]-[Thread-6] 分片参数：当前分片序号 &#x3D; 0, 总分片数 &#x3D; 2</span><br><span class="line">2020-02-05 23:29:54 [com.xuxueli.executor.sample.frameless.jobhandler.ShardingJobHandler#execute]-[25]-[Thread-6] 第 0 片, 命中分片开始处理</span><br><span class="line">2020-02-05 23:29:54 [com.xuxueli.executor.sample.frameless.jobhandler.ShardingJobHandler#execute]-[27]-[Thread-6] 第 1 片, 忽略</span><br><span class="line">2020-02-05 23:29:54 [com.xxl.job.core.thread.JobThread#run]-[164]-[Thread-6] &lt;br&gt;----------- xxl-job job execute end(finish) -----------&lt;br&gt;----------- ReturnT:ReturnT [code&#x3D;200, msg&#x3D;null, content&#x3D;null]</span><br><span class="line">2020-02-05 23:29:55 [com.xxl.job.core.thread.TriggerCallbackThread#callbackLog]-[190]-[xxl-job, executor TriggerCallbackThread] &lt;br&gt;----------- xxl-job job callback finish.</span><br></pre></td></tr></table></figure>
+<h2 id="用户管理"><a href="#用户管理" class="headerlink" title="用户管理"></a>用户管理</h2><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809830330474.jpg" alt="-w450"><br>两种角色：</p>
+<ul>
+<li>管理员：拥有所有的执行器的权限</li>
+<li>普通用户：由管理分配指定的执行器的权限<h2 id="目前发现的几个小问题"><a href="#目前发现的几个小问题" class="headerlink" title="目前发现的几个小问题"></a>目前发现的几个小问题</h2><h3 id="报表页面统计简单"><a href="#报表页面统计简单" class="headerlink" title="报表页面统计简单"></a>报表页面统计简单</h3>运行报表页面只有任务数量、调度次数、执行器数量的统计，无法根据不同执行器展现特定执行器的数据报表。<h3 id="不同用户的报表页面数据没有隔离"><a href="#不同用户的报表页面数据没有隔离" class="headerlink" title="不同用户的报表页面数据没有隔离"></a>不同用户的报表页面数据没有隔离</h3><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809837001285.jpg" alt="-w450"></li>
+</ul>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809836580697.jpg" alt="-w450"><br>对于allen用户，报表页面的数据和管理员登录后所展示的数据一样。<br>但执行器管理和任务管理以及调度日志，是做了数据隔离的。</p>
+<h3 id="手动输入执行器总显示Online"><a href="#手动输入执行器总显示Online" class="headerlink" title="手动输入执行器总显示Online"></a>手动输入执行器总显示Online</h3><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809839793863.jpg" alt="-w450"><br>对于手动录入的执行器，总显示Online。<br>这样的好处是，用户可以手动控制上线的机器，只要修改机器列表即可。</p>
+<h2 id="是否可以覆盖需求"><a href="#是否可以覆盖需求" class="headerlink" title="是否可以覆盖需求"></a>是否可以覆盖需求</h2><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/02/06/15809841544862.jpg" alt="-w450"></p>
+<ol>
+<li>是否可以指定节点运行？<br>A：XXL-JOB运行的基本单位是一个执行器集群，但是可以通过指定不同的路由策略达到指定机器节点的目的。</li>
+<li>JOB可以被高频调用<br>A：参照<a href="https://github.com/xuxueli/xxl-job/issues/225" target="_blank" rel="noopener">压测报告</a><br>XXLJOB有过持续20小时，80W次调度100%成功率的测试报告。</li>
+<li>支持大数据量的任务调度<br>A：XXL-JOB支持分片广播，是支持大数据量的任务调度的，数据量的多少应该取决于执行器集群的数量吧</li>
+<li>调度策略简单明了？<br>A：简单明了</li>
+<li>提供API<br><a href="https://www.xuxueli.com/xxl-job/#5.12%20%E6%89%A7%E8%A1%8C%E5%99%A8API%E6%9C%8D%E5%8A%A1" target="_blank" rel="noopener">API接口</a><br>提供了调度中心和执行器的API。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://yoursite.com/2022/12/01/xxl-job-survey/" title="XXL-JOB 分布式任务调度平台调研使用分析" target="_blank" rel="external">http://yoursite.com/2022/12/01/xxl-job-survey/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lazyallen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lazyallen" target="_blank"><span class="text-dark">lazyallen</span><small class="ml-1x">No one</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2022/12/01/unit-test-littile-share/" title="单元测试:从Junit到Powermock"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2022/12/01/what-is-ioc/" title="解惑：究竟什么是IOC（控制反转）？"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: 'dFjUZtZHQkj381ud5aooTo7U-gzGzoHsz',
+  appKey: '6s4k8JcIPxZ6u9Dwmw4CrLch'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 's1NTgTtFG2fGcypwMSm6Q6Gi-gzGzoHsz',
+    appKey: 'sfruutrdOr8aDHGb96QGfh94',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>

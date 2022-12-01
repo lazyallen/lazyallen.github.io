@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>解惑：对于SPI的一些理解 | Hexo</title>
+  <meta name="description" content="很早就了解过SPI的概念，刚开始知道是看JDBC驱动实现的时候发现有用到，后面陆陆续续发现在Dubbo中也有Dubbo SPI的概念，希望可以把自己的理解和困惑记录下来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解惑：对于SPI的一些理解">
+<meta property="og:url" content="http://yoursite.com/2022/12/01/java-spi-think/index.html">
+<meta property="og:site_name" content="Allen">
+<meta property="og:description" content="很早就了解过SPI的概念，刚开始知道是看JDBC驱动实现的时候发现有用到，后面陆陆续续发现在Dubbo中也有Dubbo SPI的概念，希望可以把自己的理解和困惑记录下来。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-1236-am.png">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-108-am.png">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-109-am.png">
+<meta property="article:published_time" content="2022-12-01T08:31:35.051Z">
+<meta property="article:modified_time" content="2022-12-01T08:31:35.051Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-1236-am.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://yoursite.com/2022/12/01/java-spi-think/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Allen" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lazyallen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">lazyallen</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">No one</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SPI/">SPI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bridge/" rel="tag">Bridge</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CICD/" rel="tag">CICD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Dubbo/" rel="tag">Dubbo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Groovy/" rel="tag">Groovy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/" rel="tag">IOC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Network/" rel="tag">Network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UnitTest/" rel="tag">UnitTest</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Bridge/" style="font-size: 13px;">Bridge</a> <a href="/tags/CICD/" style="font-size: 13px;">CICD</a> <a href="/tags/Dubbo/" style="font-size: 13px;">Dubbo</a> <a href="/tags/Groovy/" style="font-size: 13px;">Groovy</a> <a href="/tags/IOC/" style="font-size: 13px;">IOC</a> <a href="/tags/Java/" style="font-size: 14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 13px;">Jenkins</a> <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/Network/" style="font-size: 13px;">Network</a> <a href="/tags/Spring-Boot/" style="font-size: 13px;">Spring Boot</a> <a href="/tags/UnitTest/" style="font-size: 13px;">UnitTest</a> <a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" style="font-size: 13px;">任务调度</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 14px;">分布式</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">10</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Docker/">Docker</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/use-docker-bridge-network-driver/" class="title">浅析Docker 独立容器的网络通信模式</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/unit-test-littile-share/" class="title">单元测试:从Junit到Powermock</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/xxl-job-survey/" class="title">XXL-JOB 分布式任务调度平台调研使用分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/what-is-ioc/" class="title">解惑：究竟什么是IOC（控制反转）？</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.053Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/01/jenkins-groovy-script-console/" class="title">Groovy Script Console：如何找出Jenkins中所有授信失效的项目</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-01T08:31:35.052Z" itemprop="datePublished">2022-12-01</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SPI%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">SPI解决了什么问题？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SPI%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">SPI的实现原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JDBC%E4%B8%AD%E7%9A%84SPI%E6%9C%BA%E5%88%B6"><span class="toc-number">3.</span> <span class="toc-text">JDBC中的SPI机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RPC%E6%A1%86%E6%9E%B6%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">RPC框架、可扩展性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E7%82%B9%E4%B8%AA%E4%BA%BA%E7%90%86%E8%A7%A3"><span class="toc-number">5.</span> <span class="toc-text">一点个人理解</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-java-spi-think" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      解惑：对于SPI的一些理解
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/12/01/java-spi-think/" class="article-date">
+	  <time datetime="2022-12-01T08:31:35.051Z" itemprop="datePublished">2022-12-01</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/SPI/">SPI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/Java/" rel="tag">Java</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2022/12/01/java-spi-think/" class="leancloud_visitors"  data-flag-title="解惑：对于SPI的一些理解">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/12/01/java-spi-think/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.3k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 9(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>很早就了解过<code>SPI</code>的概念，刚开始知道是看JDBC驱动实现的时候发现有用到，后面陆陆续续发现在<code>Dubbo</code>中也有<code>Dubbo SPI</code>的概念，希望可以把自己的理解和困惑记录下来。</p>
+<a id="more"></a>
+
+
+<h2 id="SPI解决了什么问题？"><a href="#SPI解决了什么问题？" class="headerlink" title="SPI解决了什么问题？"></a>SPI解决了什么问题？</h2><p>一种技术的产生必然有其产生的原因，如果现有的技术可以满足解决，就不会出现一种新的解决方案。简单来说，<code>Java SPI</code>实际上是<code>“基于接口的编程＋策略模式＋配置文件”</code>组合实现的动态加载机制。简单理解，既然策略模式可以解决，为什么还要<code>SPI</code>呢？这里举一个例子。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Pay</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AliPay</span> <span class="keyword">implements</span> <span class="title">pay</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WeChatPay</span> <span class="keyword">implements</span> <span class="title">Pay</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bussiness</span></span>&#123;</span><br><span class="line">    <span class="comment">//使用支付宝</span></span><br><span class="line">    Pay pay = <span class="keyword">new</span> AliPay();</span><br><span class="line">    <span class="comment">//老板跟阿里吵架了，该用微信支付了</span></span><br><span class="line">    Pay pay = <span class="keyword">new</span> WeChat();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于支付方式来说，目前市场上有2种主流的支付方式。公司目前使用的是支付宝，突然有一天，老板接受了一篇专访，结果马爸爸骂老板是“三姓家奴”，老板一怒之下把支付宝给下了，改用微信支付。这时，对于开发者来说的改动看起来简单只是new 一个新的实现而已。<br>直接改动原来的代码不是说不可以，只是违背了<code>开闭原则</code>的设计原则，对扩展开发，对修改关闭。换一个角度，你永远无法直接需求会怎么变动，万一哪天老板要求改回来怎么办。</p>
+<h2 id="SPI的实现原理"><a href="#SPI的实现原理" class="headerlink" title="SPI的实现原理"></a>SPI的实现原理</h2><p>对于上一节的例子，可以采用SPI的方式，具体Java SPI的使用这里不做过多解释。可以简单看下JDBC中的例子。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ServiceLoader&lt;Driver&gt; loadedDrivers = ServiceLoader.load(Driver<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">Iterator&lt;Driver&gt; driversIterator = loadedDrivers.iterator();</span><br></pre></td></tr></table></figure>
+
+<p>在进入代码之前，我们可以猜测一下实现方式如何。在功能表象而言，<code>SPI</code>提供的能力其实就是在应用的运行期，加载并实例化 <code>META-INF/services</code>配置中定义的类。<br>进入<code>load</code>方法发现也差不多，这里给出关键的代码片段。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">hasNextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (nextName != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (configs == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    String fullName = PREFIX + service.getName();</span><br><span class="line">                    <span class="keyword">if</span> (loader == <span class="keyword">null</span>)</span><br><span class="line">                        configs = ClassLoader.getSystemResources(fullName);</span><br><span class="line">                    <span class="keyword">else</span></span><br><span class="line">                        <span class="comment">//从配置文件找到类的全限定名</span></span><br><span class="line">                        configs = loader.getResources(fullName);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException x) &#123;</span><br><span class="line">                    fail(service, <span class="string">"Error locating configuration files"</span>, x);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">while</span> ((pending == <span class="keyword">null</span>) || !pending.hasNext()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!configs.hasMoreElements()) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                pending = parse(service, configs.nextElement());</span><br><span class="line">            &#125;</span><br><span class="line">            nextName = pending.next();</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> S <span class="title">nextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (!hasNextService())</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException();</span><br><span class="line">            String cn = nextName;</span><br><span class="line">            nextName = <span class="keyword">null</span>;</span><br><span class="line">            Class&lt;?&gt; c = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">//触发类的加载</span></span><br><span class="line">                c = Class.forName(cn, <span class="keyword">false</span>, loader);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ClassNotFoundException x) &#123;</span><br><span class="line">                fail(service,</span><br><span class="line">                     <span class="string">"Provider "</span> + cn + <span class="string">" not found"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (!service.isAssignableFrom(c)) &#123;</span><br><span class="line">                fail(service,</span><br><span class="line">                     <span class="string">"Provider "</span> + cn  + <span class="string">" not a subtype"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                S p = service.cast(c.newInstance());</span><br><span class="line">                providers.put(cn, p);</span><br><span class="line">                <span class="keyword">return</span> p;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable x) &#123;</span><br><span class="line">                fail(service,</span><br><span class="line">                     <span class="string">"Provider "</span> + cn + <span class="string">" could not be instantiated"</span>,</span><br><span class="line">                     x);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error();          <span class="comment">// This cannot happen</span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="JDBC中的SPI机制"><a href="#JDBC中的SPI机制" class="headerlink" title="JDBC中的SPI机制"></a>JDBC中的SPI机制</h2><p><code>JDK</code>制定了<code>JDBC</code>规范，落实到代码层面可简单认为<code>JDK</code>提供了<code>JDBC interface</code>接口，各个数据库厂商根据这一份规范做各自的实现。当我们需要使用<code>MySql</code>时，就可以引入相应的依赖，同时找到<code>MySql</code>的实现去使用，正好符合<code>SPI</code> 的应用场景。<br>简单分析一下，<code>JDBC</code>的<code>SPI</code>的使用逻辑。入口在<code>conn = DriverManager.getConnection(url, username, password);</code>,当执行到这一句代码时，会触发<code>DriverManager</code>的加载和初始化，进入<code>DriverManager</code>可以看到下面的<code>static</code>的静态代码块，我们知道<code>JVM</code>在加载类时会触发<code>static</code>代码块的执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line">     * Load the initial JDBC drivers by checking the System property</span><br><span class="line">     * jdbc.properties and then use the &#123;@code ServiceLoader&#125; mechanism</span><br><span class="line">     *&#x2F;</span><br><span class="line">    static &#123;</span><br><span class="line">        loadInitialDrivers();</span><br><span class="line">        println(&quot;JDBC DriverManager initialized&quot;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>从代码块的注释可以看出，<code>loadInitialDrivers()</code> 做的事情仅仅是加载初始化的<code>JDBC</code>驱动，这里会首先去检查系统配置中的<code>jdbc.properties</code>配置，之后再会使用<code>ServiceLoader</code>去加载。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-1236-am.png" alt="2020-10-25 at 12.36 A"></p>
+<p>可以看到，具体的实现类为<code>com.mysql.cj.jdbc.Driver</code>，也就是说此时会触发<code>com.mysql.cj.jdbc.Driver</code>的加载初始化，我们在看一下<code>com.mysql.cj.jdbc.Driver</code>的代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class Driver extends NonRegisteringDriver implements java.sql.Driver &#123;</span><br><span class="line">    public Driver() throws SQLException &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            DriverManager.registerDriver(new Driver());</span><br><span class="line">        &#125; catch (SQLException var1) &#123;</span><br><span class="line">            throw new RuntimeException(&quot;Can&#39;t register driver!&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>com.mysql.cj.jdbc.Driver</code> 的做的事情非常简单，就是把自己注册到<code>DriverManager</code>中，注意，此时<code>com.mysql.cj.jdbc.Driver</code> 可以看作已经完成了加载初始化，并<code>new</code>出了一个实例注册到了<code>DriverManager</code>中。依旧从<code>conn = DriverManager.getConnection(url, username, password);</code>的方法可以看到<code>DriverManager</code>是如何使用<code>registeredDrivers</code>的,从注释中可以看到会从已注册的<code>registeredDrivers</code>逐个尝试进行一次连接，拿到正确的<code>Connection</code>就返回。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Walk through the loaded registeredDrivers attempting to make a connection.</span></span><br><span class="line">        <span class="comment">// Remember the first exception that gets raised so we can reraise it.</span></span><br><span class="line">        SQLException reason = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(DriverInfo aDriver : registeredDrivers) &#123;</span><br><span class="line">            <span class="comment">// If the caller does not have permission to load the driver then</span></span><br><span class="line">            <span class="comment">// skip it.</span></span><br><span class="line">            <span class="keyword">if</span>(isDriverAllowed(aDriver.driver, callerCL)) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    println(<span class="string">"    trying "</span> + aDriver.driver.getClass().getName());</span><br><span class="line">                    Connection con = aDriver.driver.connect(url, info);</span><br><span class="line">                    <span class="keyword">if</span> (con != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// Success!</span></span><br><span class="line">                        println(<span class="string">"getConnection returning "</span> + aDriver.driver.getClass().getName());</span><br><span class="line">                        <span class="keyword">return</span> (con);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (SQLException ex) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (reason == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        reason = ex;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                println(<span class="string">"    skipping: "</span> + aDriver.getClass().getName());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外多提一点，<code>Java SPI</code>在这里还打破了类的双亲委托机制。我们知道，<code>JVM</code>在加载类时，会遵循双亲委托机制，同时对于一个<code>Class</code>而言，其中的依赖类也会使用加载该<code>Class</code>的类加载器去加载。比如说，<code>Class A</code> 中有一个 <code>Class B</code>的依赖，在<code>JVM</code> 加载 <code>A</code>时，假如用的是启动类加载器，此时也只能用启动类加载器去加载<code>B</code> （前提是 <code>B</code> 还没被加载到<code>JVM</code>中，我们知道<code>JVM</code>在加载<code>Class</code>时首先会检查该<code>Class</code>是否已经加载到<code>JVM</code>中，如果没有被加载，则使用双亲委托机制去加载）。为什么这样做呢？反面去想的话，如果<code>A</code>是启动类加载器加载的，<code>A</code>必定属于<code>JDK</code>的核心类，倘若<code>A</code>中的依赖不由启动类加载器去加载，而使用应用类加载器去加载，此时如果此时在应用目录伪造一个 核心的类 ，比如说<code>Object</code>类，让应用类加载器去加载<code>Object</code>类到<code>JVM</code>，此时必定带来安全的风险。<br>那么类比于<code>JDBC</code>，<code>DriverManager</code> 属于<code>JDK</code>的核心包，可知加载<code>DriverManager</code>必定是启动类加载器，那么<code>DriverManager</code>中的依赖应该也是由启动类加载去加载，但我们知道<code>Driver</code>接口的实现类是第三方厂商自定义的，这些实现类必然不会被启动类加载器去加载。怎么解决这个问题呢？只要启动类加载器加载<code>DriverManager</code>时，提前把第三方厂商实现的<code>Driver</code>实现类加载到JVM中就行。所以在<code>DriverManager</code> 的<code>static</code>静态代码块中的<code>loadInitialDrivers()</code>的做事情就是提前加载。</p>
+<h2 id="RPC框架、可扩展性"><a href="#RPC框架、可扩展性" class="headerlink" title="RPC框架、可扩展性"></a>RPC框架、可扩展性</h2><p>在后续看<code>Dubbo</code> 和 <code>soft-rpc</code>等 <code>RPC</code>框架中，发现均存在类似<code>SPI</code>的设计，例如<code>Dubbo</code>自己实现类一套<code>Dubbo SPI</code>的机制，比<code>Java SPI</code>更加优雅，并且可以做到按需加载。<br>这里引用何小锋老师的一段解释：</p>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-108-am.png" alt="2020-10-25 at 1.08 A"></p>
+<blockquote>
+<p>在 RPC 框架里面，我们是怎么支持插件化架构的呢？我们可以将每个功能点抽象成一个接口，将这个接口作为插件的契约，然后把这个功能的接口与功能的实现分离，并提供接口的默认实现。加上了插件功能之后，我们的 RPC 框架就包含了两大核心体系——核心功能体系与插件体系</p>
+</blockquote>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/10/25/20201025-at-109-am.png" alt="2020-10-25 at 1.09 A"></p>
+<blockquote>
+<p>这时，整个架构就变成了一个微内核架构，我们将每个功能点抽象成一个接口，将这个接口作为插件的契约，然后把这个功能的接口与功能的实现分离并提供接口的默认实现。这样的架构相比之前的架构，有很多优势。首先它的可扩展性很好，实现了开闭原则，用户可以非常方便地通过插件扩展实现自己的功能，而且不需要修改核心功能的本身；其次就是保持了核心包的精简，依赖外部包少，这样可以有效减少开发人员引入 RPC 导致的包版本冲突问题。</p>
+</blockquote>
+<h2 id="一点个人理解"><a href="#一点个人理解" class="headerlink" title="一点个人理解"></a>一点个人理解</h2><p><code>SPI</code>最大的好处就是，对于使用方（调用方）而言，屏蔽了变化性，服务的提供方可以动态去提供各种各样的服务（接口实现类），相比于传统的设计，由程序员自己去手动编写静态的代码逻辑去维护这种变化，一方面不符合开闭原则，一方面维护也是一个成本（如果服务很多的话，例如像<code>Dubbo</code>各种各样的<code>SPI</code>接口实现）。<br>这种可插拔的设计，和<code>Spring IOC</code>设计 很像，变化时只需要改变实现方 使用方可无感知使用，对使用方来说无侵入性。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://yoursite.com/2022/12/01/java-spi-think/" title="解惑：对于SPI的一些理解" target="_blank" rel="external">http://yoursite.com/2022/12/01/java-spi-think/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lazyallen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lazyallen" target="_blank"><span class="text-dark">lazyallen</span><small class="ml-1x">No one</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2022/12/01/state-in-code-design-and-service-design/" title="从String类的不可变谈到分布式一致性"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2022/12/01/dubbo-event-driven-introduction/" title="浅析Dubbo的事件驱动机制"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: 'dFjUZtZHQkj381ud5aooTo7U-gzGzoHsz',
+  appKey: '6s4k8JcIPxZ6u9Dwmw4CrLch'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 's1NTgTtFG2fGcypwMSm6Q6Gi-gzGzoHsz',
+    appKey: 'sfruutrdOr8aDHGb96QGfh94',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
