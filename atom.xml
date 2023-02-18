@@ -5,47 +5,47 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://yoursite.com/"/>
-  <updated>2022-12-07T08:10:13.791Z</updated>
-  <id>http://yoursite.com/</id>
+  <link href="https://lazyallen.github.io/"/>
+  <updated>2023-02-18T15:41:58.439Z</updated>
+  <id>https://lazyallen.github.io/</id>
   
   <author>
-    <name>John Doe</name>
+    <name>Allen Chang</name>
     
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>单元测试规范和实践</title>
-    <link href="http://yoursite.com/2022/03/07/Unit-Testing-Specification-and-Practice/"/>
-    <id>http://yoursite.com/2022/03/07/Unit-Testing-Specification-and-Practice/</id>
-    <published>2022-03-06T16:00:00.000Z</published>
-    <updated>2022-12-07T08:10:13.791Z</updated>
+    <title>Helm工程实践：如何维护一个Helm工程</title>
+    <link href="https://lazyallen.github.io/2023/02/18/helm-practice/"/>
+    <id>https://lazyallen.github.io/2023/02/18/helm-practice/</id>
+    <published>2023-02-17T16:00:00.000Z</published>
+    <updated>2023-02-18T15:41:58.439Z</updated>
     
-    <content type="html"><![CDATA[<h2 id="什么是单元测试"><a href="#什么是单元测试" class="headerlink" title="什么是单元测试"></a>什么是单元测试</h2><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202212071551974.png" alt=""><br>单元测试的目标是隔离程序的每个部分并显示各个部分按预期工作。单元测试是由软件开发人员编写和运行的自动化测试，以确保应用程序的一部分(称为单元)按预期工作。<br>单元是可以在系统中逻辑隔离的最小代码段。这可以是单个函数、方法、过程、模块、类或对象。通常，一个单元有几个输入和一个输出。单元测试由软件开发人员在应用程序的开发(编码阶段)期间完成。<br>只有各个部分运行良好，整个系统才能运行良好。通过为最小的可测试单元编写测试，软件开发人员建立了整个系统将按预期工作的信心。一旦软件开发人员编写了单元测试，他们就可以在本地机器上运行它以检查测试是否通过。他们还可以运行所有其他预先存在的测试来检查它们是否仍然通过。<br>我们有单元测试、增量测试、集成测试、回归测试、冒烟测试等等，名字非常多。<br>谷歌看到这种“百家争鸣”的现象，创立了自己的命名方式，只分为小型测试、中型测试和大型测试。</p><ul><li>小型测试，针对单个函数的测试，关注其内部逻辑，mock所有需要的服务。小型测试带来优秀的代码质量、良好的异常处理、优雅的错误报告 </li><li>中型测试，验证两个或多个制定的模块应用之间的交互 大型测试，也被称为“系统测试”或“端到端测试”。</li><li>大型测试在一个较高层次上运行，验证系统作为一个整体是如何工作的。</li></ul><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202212071603659.png" alt=""><br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202212071604871.png" alt=""></p><p>单元测试是白盒测试，集成测试是黑盒测试，单纯依赖QA进行集成测试，测试工作大都是手工为主，受主观人为因素影响太大:每次版本发布，QA 全凭个人 经验来确定改动对系统影响范围，通常情况，要么测试范围定小了，造成漏测，要么测试范围过大，付出的代价过高，造成项目不能如期按时交付。<br>单元测试在绝多数场景下其实是盒的测试思维，即单元测试的是”What“，不 是”How“。要把“What”拆分成系列不同的为。为就是对不同的输场景有不 同的输出，每个为都需要独的单测。这样有新的为引时，就不需要修改已有的单测了。行为来源于需求。</p><h2 id="单元测试的优缺点"><a href="#单元测试的优缺点" class="headerlink" title="单元测试的优缺点"></a>单元测试的优缺点</h2><p>优点:</p><ol><li>如果没有单元测试的话，就只能把项目运行起来测试，这比运行一次单元测试要慢多了;</li><li>尽早发现bug，减少了debug和fixbug的时间;</li><li>重构的时候，大大减少手动验证重构正确性的时间;<br>缺点:</li><li>花时间:开发人员不仅要实现业务逻辑代码，而是还需要完成相应的单元测试，有时单元测试代码比业务逻辑代码还长;</li><li>不能反映所有问题:比如系统中的性能问题就反映不出来;<h2 id="基本流程-Given-When-Then"><a href="#基本流程-Given-When-Then" class="headerlink" title="基本流程:Given, When, Then"></a>基本流程:Given, When, Then</h2>单元测试的代码结构般一个三步经典结构:准备，调，断。</li><li>准备部分的的是准备好调所需要的外部环境，如数据，Stub(打桩)，Mock，临时变量，调请求，环境背景变量等等; </li><li>调部分则是实际调需要测试法，函数或者流程;</li><li>断部分判断调部分的返回结果是否符合预期;</li></ol><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">givenPages(xxx);</span><br><span class="line">whenRequestIsIssued(xxx);</span><br><span class="line">thenResponseShouldBeXML()</span><br></pre></td></tr></table></figure><h2 id="基本原则"><a href="#基本原则" class="headerlink" title="基本原则"></a>基本原则</h2><ul><li>单元性(快速)<ul><li>执行速度必须快</li><li>测试力度足够小，能够精确定位问题</li></ul></li><li>单一职责:一个测试case只负责一条路径，测试代码中不允许有复杂的逻辑条件 独立性(无依赖)<ul><li>避免单元测试之间的依赖关系，一个测试的运行不依赖于其他测试代码的运行结果</li></ul></li><li>不依赖外部环境，建议使用Mock 可重复性(幂等性)<ul><li>每次执行的结果都相同</li><li>自验证</li><li>不靠人来检查，必须使用断言; 尽可能断言具体的内容(简单的为空判断起不到太大的作用) 测试代码必须有好的前置条件和后置断言 </li><li>异常的验证使用expectedExceptions<h2 id="基本规范"><a href="#基本规范" class="headerlink" title="基本规范"></a>基本规范</h2>单元测试并不是越多越好，功能简单的，非关键模块的代码不强制要求编写单元测试，但编写也无妨。核心应用核心业务增量代码一定要写单元测试。<blockquote><p>至少正常场景下的case可以过。</p></blockquote></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<h2 id="Helm简介"><a href="#Helm简介" class="headerlink" title="Helm简介"></a>Helm简介</h2><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202302182306051.png" alt=""></p><p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202302182307563.png" alt=""></p><ul><li>包管理</li><li>模板引擎:Go template</li></ul><h3 id="helm-3-渲染资源的顺序"><a href="#helm-3-渲染资源的顺序" class="headerlink" title="helm 3 渲染资源的顺序"></a>helm 3 渲染资源的顺序</h3><p>假设有个chart “A” 创建了下面的Kubernetes对象:</p><ul><li>namespace “A-Namespace” </li><li>statefulset “A-StatefulSet” </li><li>service “A-Service”</li></ul><p>另外，A是依赖于chart B创建的对象:</p><ul><li>namespace “B-Namespace” </li><li>replicaset “B-ReplicaSet” </li><li>service “B-Service”</li></ul><p>安装/升级chart A后，会创建/修改一个单独的Helm版本。这个版本会按顺序创建/升级以下所有的Kubernetes对象:</p><ul><li>A-Namespace </li><li>B-Namespace </li><li>A-Service </li><li>B-Service </li><li>B-ReplicaSet </li><li>A-StatefulSet</li></ul><p>这是因为当Helm安卓/升级chart时，chart中所有的Kubernetes对象以及依赖会</p><ul><li>聚合成一个单一的集合;然后 </li><li>按照类型和名称排序;</li><li>然后按这个顺序创建/升级。<br>至此会为chart及其依赖创建一个包含所有对象的release版本。 Kubernetes类型的安装顺序会按照kind_sorter.go(查看Helm源文件)中给出的枚举顺序进行。</li></ul><h3 id="CRD的限制"><a href="#CRD的限制" class="headerlink" title="CRD的限制"></a>CRD的限制</h3><p>不像大部分的Kubernetes对象，CRD是全局安装的。因此Helm管理CRD时会采取非常谨慎的方式。 CRD受到以下限制:</p><ul><li>CRD从不重新安装。 如果Helm确定crds/目录中的CRD已经存在(忽略版本)，Helm不会安装或升级。 </li><li>CRD从不会在升级或回滚时安装。Helm只会在安装时创建CRD。 </li><li>CRD从不会被删除。自动删除CRD会删除集群中所有命名空间中的所有CRD内容。因此Helm不会删除CRD。<br>希望升级或删除CRD的操作员应该谨慎地手动执行此操作。</li></ul><h2 id="chart-示例"><a href="#chart-示例" class="headerlink" title="chart 示例"></a>chart 示例</h2><h3 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h3><ul><li>kubeconfig : 用于chart 的部署测试。非必选，如没有k8s环境，后面只能使用template 输出渲染文件;</li><li>VS code 及插件:<ul><li><a href="https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools">https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools</a> </li><li><a href="https://marketplace.visualstudio.com/items?itemName=Tim-Koehler.helm-intellisense">https://marketplace.visualstudio.com/items?itemName=Tim-Koehler.helm-intellisense</a> </li><li><a href="https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml">https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml</a></li></ul></li><li>helm 及插件<ul><li><a href="https://helm.sh/docs/intro/install/">https://helm.sh/docs/intro/install/</a> </li><li><a href="https://github.com/norwoodj/helm-docs">https://github.com/norwoodj/helm-docs</a> </li><li><a href="https://github.com/karuppiah7890/helm-schema-gen">https://github.com/karuppiah7890/helm-schema-gen</a> </li><li><a href="https://github.com/chartmuseum/helm-push">https://github.com/chartmuseum/helm-push</a></li></ul></li></ul><h3 id="获取开发环境"><a href="#获取开发环境" class="headerlink" title="获取开发环境"></a>获取开发环境</h3><h4 id="使用Chart-Starter-包"><a href="#使用Chart-Starter-包" class="headerlink" title="使用Chart Starter 包"></a>使用Chart Starter 包</h4><p>对于相似度很高的项目，可以使用chart starter ，可以节约修改 chart name的时间;clone 仓库到本地后，加入到HELM_DATA_HOME目录下的starters目录中。之后再根据每个业务组件自身需要进行修改</p><h4 id="使用helm-create"><a href="#使用helm-create" class="headerlink" title="使用helm create"></a>使用helm create</h4><p>适合从零开始开发的chart</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm create mychart</span><br><span class="line">rm -rf mychart/templates/*</span><br></pre></td></tr></table></figure><p>在容器里开发</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Kubernetesk8s config copy~/.kube/config</span><br><span class="line">$ docker image pull registry.xxx.com/xxx/helm-playground:xxxx</span><br><span class="line">$ docker run -it --rm -v ~/.kube:/root/.kube xxxx /bin/bash</span><br></pre></td></tr></table></figure><h3 id="修改templates-和-values"><a href="#修改templates-和-values" class="headerlink" title="修改templates 和 values"></a>修改templates 和 values</h3><p>修改需要部署的资源文件和values，保证一个应用的最小可部署资源集合;</p><p>开发建议   </p><ul><li>命名规范:template文件用小写字母;values中的变量使用驼峰;<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ tree ./ ./</span><br><span class="line"> Chart.yaml</span><br><span class="line"> README.md</span><br><span class="line"> README.md.gotmpl</span><br><span class="line"> templates</span><br><span class="line">    NOTES.txt</span><br><span class="line">    _helpers.tpl</span><br><span class="line">    bootstrap-configmap.yaml</span><br><span class="line">    clusterrole.yaml</span><br><span class="line">    clusterrolebinding.yaml</span><br><span class="line">    deployment.yaml</span><br><span class="line">    init-job.yaml</span><br><span class="line">    persistentvolume.yaml</span><br><span class="line">    persistentvolumeclaim.yaml</span><br><span class="line">    service-monitor.yaml</span><br><span class="line">    service.yaml</span><br><span class="line">    serviceaccount.yaml</span><br><span class="line">    storageclass.yaml</span><br><span class="line"> values.schema.json</span><br><span class="line"> values.yaml</span><br><span class="line">1 directory, 18 files</span><br></pre></td></tr></table></figure>不要hardcode namespace，而是通过 – namespace flag 动态传入，后者灵活性更强。</li></ul><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># suggest</span><br><span class="line">helm install business-defender ./ -n whale-component --debug --atomic</span><br><span class="line"># not suggest</span><br><span class="line">metadata:</span><br><span class="line">  namespace: &#123;&#123; .Release.Namespace &#125;&#125;</span><br></pre></td></tr></table></figure><p><a href="https://github.com/helm/helm/issues/5465">https://github.com/helm/helm/issues/5465</a></p><ul><li>_helpers.tpl 可类比成 Utils 类:比较通用，复用比较多 的逻辑 比较复杂的逻辑 </li></ul><p>在_helpers.tpl 定义Named Templates 时，统一以chart.name 开头。相当于把chart.name 当作name templates 的命名空间，避免引用冲突;</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># good</span><br><span class="line">&#123;&#123;/* Create a default fully qualified app name. */&#125;&#125;</span><br><span class="line">&#123;&#123;- define &quot;business-defender.fullname&quot; -&#125;&#125;</span><br><span class="line">...</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line"># bad</span><br><span class="line">&#123;&#123;/* Create a default fully qualified app name. */&#125;&#125;</span><br><span class="line">&#123;&#123;- define &quot;fullname&quot; -&#125;&#125;</span><br><span class="line">...</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br></pre></td></tr></table></figure><ul><li>给values写注释，并用helm-docs生成文档，用helm schema-gen 生成schema.json文件<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  # -- machine architecture</span><br><span class="line">  hostArch: &quot;amd64&quot;</span><br><span class="line">  # -- docker registry</span><br><span class="line">  dockerRegistry: &quot;registry.xxxx.com&quot;</span><br><span class="line">  # -- prometheus namespace</span><br><span class="line">  monitorNamespace: &quot;monitoring&quot;</span><br></pre></td></tr></table></figure></li></ul><h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>语法验证</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ helm lint</span><br><span class="line">==&gt; Linting .</span><br><span class="line">[INFO] Chart.yaml: icon is recommended</span><br><span class="line">1 chart(s) linted, 0 chart(s) failed</span><br></pre></td></tr></table></figure><p>渲染验证</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm template ./ --debug -n whale-component</span><br><span class="line">helm install business-defender ./ -n whale-component --debug --dry-run</span><br></pre></td></tr></table></figure><p>template 和 install –dry-run 的区别在于是否会和 Kubernetes Api Server 通行。使用 install –dry-run ,相当于helm 渲染资源后使用kubectl 的–dry-run 验证一样;因为可以和k8s通信，可以获取一些k8s的元数据，此时，.Capabilities 内置对象才有意义;</p><p>部署验证<br>验证时，需要在 defender 环境下验证，因为chart中可能包含一些预定的资源依赖，比如 password-secret;</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># atomic flag</span><br><span class="line">helm install business-defender ./ -n whale-component --debug --atomic</span><br><span class="line"></span><br><span class="line"># wait delete</span><br><span class="line">helm uninstall business-defender -n whale-component --wait --debug</span><br><span class="line"></span><br><span class="line">$ helm list -n whale-component</span><br><span class="line"></span><br><span class="line"># Release</span><br><span class="line">$ helm get all business-defender -n whale-component</span><br></pre></td></tr></table></figure><h3 id="pre-commit-生成readme-md-和-values-schema-json"><a href="#pre-commit-生成readme-md-和-values-schema-json" class="headerlink" title="pre-commit:生成readme.md 和 values.schema.json"></a>pre-commit:生成readme.md 和 values.schema.json</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># helm plugin schema-genvaluesschema.jsonhelm installvalues.yaml.</span><br><span class="line">helm schema-gen values.yaml &gt; values.schema.json</span><br><span class="line"># valuesreadme.md</span><br><span class="line">helm-docs</span><br></pre></td></tr></table></figure><h3 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h3><p>手动发布<br>需要手动安装 cm-push :<a href="https://github.com/chartmuseum/helm-push">https://github.com/chartmuseum/helm-push</a></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ helm plugin install https://github.com/chartmuseum/helm-push</span><br><span class="line">$ helm repo add --username &lt;username&gt; --password &lt;password&gt;  business https://registry.xxx.com/chartrepo</span><br><span class="line">/business</span><br><span class="line">$ helm cm-push --username=&lt;username&gt;  --password=&lt;password&gt;  . business --version 2.2.1l</span><br></pre></td></tr></table></figure><p>另外也可以通过页面上传</p><p>CI发布  </p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">image:</span><br><span class="line">  name: registry.xxx.com/viper-ce/library/helm-tool:3.6.3</span><br><span class="line">  entrypoint: [&quot;/bin/sh&quot;, &quot;-c&quot;]</span><br><span class="line">variables:</span><br><span class="line">  HELM_CI_REPO_ADDR: https://registry.xxx.com/chartrepo/business</span><br><span class="line">  HELM_CI_REPO_NAME: business</span><br><span class="line">stages:</span><br><span class="line">  - lint</span><br><span class="line">  - render</span><br><span class="line">  - release</span><br><span class="line">lint-chart:</span><br><span class="line">  stage: lint</span><br><span class="line">  script:</span><br><span class="line">- helm lint .</span><br><span class="line">render-chart:</span><br><span class="line">  stage: render</span><br><span class="line">  script:</span><br><span class="line">    - helm template .</span><br><span class="line">release-chart:</span><br><span class="line">  stage: release</span><br><span class="line">  script:</span><br><span class="line">    - export CHART_VERSION=$(awk &#x27;/^version/&#123;print $NF&#125;&#x27; Chart.yaml)</span><br><span class="line">    - helm repo add --username $&#123;HELM_REPO_USERNAME&#125; --password $&#123;HELM_REPO_PASSWD&#125; $&#123;HELM_CI_REPO_NAME&#125;</span><br><span class="line">$&#123;HELM_CI_REPO_ADDR&#125;</span><br><span class="line">    - helm push . $&#123;HELM_CI_REPO_NAME&#125; --version &quot;$&#123;CHART_VERSION&#125;-$&#123;CI_COMMIT_SHA:0:8&#125;&quot;</span><br><span class="line">    - helm push . $&#123;HELM_CI_REPO_NAME&#125; --version &quot;$&#123;CHART_VERSION&#125;&quot; --force</span><br><span class="line">  only:</span><br><span class="line">- master</span><br></pre></td></tr></table></figure><p>合入master时才发布一个版本;<br>每次release 会push两次:</p><ul><li>带 commit id 的版本</li><li>不带 commid id 的stable版本，强制覆盖仓库中的stable版本</li></ul><h2 id="repo管理"><a href="#repo管理" class="headerlink" title="repo管理"></a>repo管理</h2><p>仓库选择:</p><ul><li>harbor chart repo :<a href="https://registry.xxx.com/chartrepo/business">https://registry.xxx.com/chartrepo/business</a></li><li>infra团队自建并维护的chartmuseum:<a href="http://sz.xxx.xxx.net/chartrepo/sensefoundry-stable/">http://sz.xxx.xxx.net/chartrepo/sensefoundry-stable/</a></li></ul><p>是否需要单独创建一个project存储chartrepo，业务chart 和 中间件chart 是否需要区分?</p><h2 id="版本管理"><a href="#版本管理" class="headerlink" title="版本管理"></a>版本管理</h2><p>版本约定<br>helm chart 的版本管理主要是通过 Chart.yaml里面的appVersion和version去管理  </p><ul><li>appVersion:主要对应 应用 本身的版本<br>比如 business-defender 的版本是1.0.2-SNAPSHOT</li><li>version:主要对应 helm chart 版本，helm package 通过读取 Chart.yaml 里的 version进行 chart 打包，然后推送到仓库</li></ul><p>如 当前业务系统的版本为 2.2.0 ，helm chart的commit_id 6336fbe，此时version:2.2.0-6336fbe</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">version: 2.2.0</span><br><span class="line">appVersion: &quot;1.0.2-SNAPSHOT&quot;</span><br></pre></td></tr></table></figure><p>仓库中存在:</p><ul><li>以version/chart version/ 业务系统版本 的stable版本</li><li>带有commit id 的开发版本</li></ul>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;h2 id=&quot;什么是单元测试&quot;&gt;&lt;a href=&quot;#什么是单元测试&quot; class=&quot;headerlink&quot; title=&quot;什么是单元测试&quot;&gt;&lt;/a&gt;什么是单元测试&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;https://lazyallen-blog-1251933423.cos.ap
+        &lt;h2 id=&quot;Helm简介&quot;&gt;&lt;a href=&quot;#Helm简介&quot; class=&quot;headerlink&quot; title=&quot;Helm简介&quot;&gt;&lt;/a&gt;Helm简介&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;https://lazyallen-blog-1251933423.cos.ap-gua
       
     
     </summary>
     
     
-      <category term="UT" scheme="http://yoursite.com/categories/UT/"/>
+      <category term="Cloud Native" scheme="https://lazyallen.github.io/categories/Cloud-Native/"/>
     
     
-      <category term="规范" scheme="http://yoursite.com/tags/%E8%A7%84%E8%8C%83/"/>
+      <category term="Helm" scheme="https://lazyallen.github.io/tags/Helm/"/>
     
   </entry>
   
   <entry>
     <title>浅析Dubbo的事件驱动机制</title>
-    <link href="http://yoursite.com/2020/11/07/dubbo-event-driven-introduction/"/>
-    <id>http://yoursite.com/2020/11/07/dubbo-event-driven-introduction/</id>
+    <link href="https://lazyallen.github.io/2020/11/07/dubbo-event-driven-introduction/"/>
+    <id>https://lazyallen.github.io/2020/11/07/dubbo-event-driven-introduction/</id>
     <published>2020-11-06T16:00:00.000Z</published>
     <updated>2022-12-07T07:03:32.627Z</updated>
     
@@ -58,17 +58,17 @@
     </summary>
     
     
-      <category term="RPC" scheme="http://yoursite.com/categories/RPC/"/>
+      <category term="RPC" scheme="https://lazyallen.github.io/categories/RPC/"/>
     
     
-      <category term="Dubbo" scheme="http://yoursite.com/tags/Dubbo/"/>
+      <category term="Dubbo" scheme="https://lazyallen.github.io/tags/Dubbo/"/>
     
   </entry>
   
   <entry>
     <title>解惑：对于SPI的一些理解</title>
-    <link href="http://yoursite.com/2020/10/02/java-spi-think/"/>
-    <id>http://yoursite.com/2020/10/02/java-spi-think/</id>
+    <link href="https://lazyallen.github.io/2020/10/02/java-spi-think/"/>
+    <id>https://lazyallen.github.io/2020/10/02/java-spi-think/</id>
     <published>2020-10-01T16:00:00.000Z</published>
     <updated>2022-12-07T07:04:01.086Z</updated>
     
@@ -81,17 +81,17 @@
     </summary>
     
     
-      <category term="SPI" scheme="http://yoursite.com/categories/SPI/"/>
+      <category term="SPI" scheme="https://lazyallen.github.io/categories/SPI/"/>
     
     
-      <category term="Java" scheme="http://yoursite.com/tags/Java/"/>
+      <category term="Java" scheme="https://lazyallen.github.io/tags/Java/"/>
     
   </entry>
   
   <entry>
     <title>Groovy Script Console：如何找出Jenkins中所有授信失效的项目</title>
-    <link href="http://yoursite.com/2020/07/02/jenkins-groovy-script-console/"/>
-    <id>http://yoursite.com/2020/07/02/jenkins-groovy-script-console/</id>
+    <link href="https://lazyallen.github.io/2020/07/02/jenkins-groovy-script-console/"/>
+    <id>https://lazyallen.github.io/2020/07/02/jenkins-groovy-script-console/</id>
     <published>2020-07-01T16:00:00.000Z</published>
     <updated>2022-12-07T07:06:26.376Z</updated>
     
@@ -104,21 +104,21 @@
     </summary>
     
     
-      <category term="工具" scheme="http://yoursite.com/categories/%E5%B7%A5%E5%85%B7/"/>
+      <category term="工具" scheme="https://lazyallen.github.io/categories/%E5%B7%A5%E5%85%B7/"/>
     
     
-      <category term="Jenkins" scheme="http://yoursite.com/tags/Jenkins/"/>
+      <category term="Jenkins" scheme="https://lazyallen.github.io/tags/Jenkins/"/>
     
-      <category term="Groovy" scheme="http://yoursite.com/tags/Groovy/"/>
+      <category term="Groovy" scheme="https://lazyallen.github.io/tags/Groovy/"/>
     
-      <category term="CICD" scheme="http://yoursite.com/tags/CICD/"/>
+      <category term="CICD" scheme="https://lazyallen.github.io/tags/CICD/"/>
     
   </entry>
   
   <entry>
     <title>深入浅出MyBatis 源码：配置文件解析</title>
-    <link href="http://yoursite.com/2020/05/12/read-code-mybatis-configuration/"/>
-    <id>http://yoursite.com/2020/05/12/read-code-mybatis-configuration/</id>
+    <link href="https://lazyallen.github.io/2020/05/12/read-code-mybatis-configuration/"/>
+    <id>https://lazyallen.github.io/2020/05/12/read-code-mybatis-configuration/</id>
     <published>2020-05-11T16:00:00.000Z</published>
     <updated>2022-12-07T07:04:26.940Z</updated>
     
@@ -131,19 +131,19 @@
     </summary>
     
     
-      <category term="框架" scheme="http://yoursite.com/categories/%E6%A1%86%E6%9E%B6/"/>
+      <category term="框架" scheme="https://lazyallen.github.io/categories/%E6%A1%86%E6%9E%B6/"/>
     
     
-      <category term="MyBatis" scheme="http://yoursite.com/tags/MyBatis/"/>
+      <category term="MyBatis" scheme="https://lazyallen.github.io/tags/MyBatis/"/>
     
-      <category term="源码" scheme="http://yoursite.com/tags/%E6%BA%90%E7%A0%81/"/>
+      <category term="源码" scheme="https://lazyallen.github.io/tags/%E6%BA%90%E7%A0%81/"/>
     
   </entry>
   
   <entry>
     <title>当执行“Java -jar springbootapp.jar --server.port=8081” 命令后会发生什么</title>
-    <link href="http://yoursite.com/2019/11/21/spring-boot-properties-binder/"/>
-    <id>http://yoursite.com/2019/11/21/spring-boot-properties-binder/</id>
+    <link href="https://lazyallen.github.io/2019/11/21/spring-boot-properties-binder/"/>
+    <id>https://lazyallen.github.io/2019/11/21/spring-boot-properties-binder/</id>
     <published>2019-11-20T16:00:00.000Z</published>
     <updated>2022-12-07T07:04:47.585Z</updated>
     
@@ -156,17 +156,17 @@
     </summary>
     
     
-      <category term="源码" scheme="http://yoursite.com/categories/%E6%BA%90%E7%A0%81/"/>
+      <category term="源码" scheme="https://lazyallen.github.io/categories/%E6%BA%90%E7%A0%81/"/>
     
     
-      <category term="Spring Boot" scheme="http://yoursite.com/tags/Spring-Boot/"/>
+      <category term="Spring Boot" scheme="https://lazyallen.github.io/tags/Spring-Boot/"/>
     
   </entry>
   
   <entry>
     <title>从String类的不可变谈到分布式一致性</title>
-    <link href="http://yoursite.com/2019/10/11/state-in-code-design-and-service-design/"/>
-    <id>http://yoursite.com/2019/10/11/state-in-code-design-and-service-design/</id>
+    <link href="https://lazyallen.github.io/2019/10/11/state-in-code-design-and-service-design/"/>
+    <id>https://lazyallen.github.io/2019/10/11/state-in-code-design-and-service-design/</id>
     <published>2019-10-10T16:00:00.000Z</published>
     <updated>2022-12-07T07:05:00.139Z</updated>
     
@@ -179,17 +179,17 @@
     </summary>
     
     
-      <category term="杂谈" scheme="http://yoursite.com/categories/%E6%9D%82%E8%B0%88/"/>
+      <category term="杂谈" scheme="https://lazyallen.github.io/categories/%E6%9D%82%E8%B0%88/"/>
     
     
-      <category term="分布式" scheme="http://yoursite.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+      <category term="分布式" scheme="https://lazyallen.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
     
   </entry>
   
   <entry>
     <title>XXL-JOB 分布式任务调度平台调研使用分析</title>
-    <link href="http://yoursite.com/2019/09/24/xxl-job-survey/"/>
-    <id>http://yoursite.com/2019/09/24/xxl-job-survey/</id>
+    <link href="https://lazyallen.github.io/2019/09/24/xxl-job-survey/"/>
+    <id>https://lazyallen.github.io/2019/09/24/xxl-job-survey/</id>
     <published>2019-09-23T16:00:00.000Z</published>
     <updated>2022-12-07T07:05:53.739Z</updated>
     
@@ -202,19 +202,19 @@
     </summary>
     
     
-      <category term="中间件" scheme="http://yoursite.com/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+      <category term="中间件" scheme="https://lazyallen.github.io/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
     
     
-      <category term="分布式" scheme="http://yoursite.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+      <category term="分布式" scheme="https://lazyallen.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
     
-      <category term="任务调度" scheme="http://yoursite.com/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/"/>
+      <category term="任务调度" scheme="https://lazyallen.github.io/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/"/>
     
   </entry>
   
   <entry>
     <title>单元测试:从Junit到Powermock</title>
-    <link href="http://yoursite.com/2019/08/11/unit-test-littile-share/"/>
-    <id>http://yoursite.com/2019/08/11/unit-test-littile-share/</id>
+    <link href="https://lazyallen.github.io/2019/08/11/unit-test-littile-share/"/>
+    <id>https://lazyallen.github.io/2019/08/11/unit-test-littile-share/</id>
     <published>2019-08-10T16:00:00.000Z</published>
     <updated>2022-12-07T07:05:13.216Z</updated>
     
@@ -227,19 +227,19 @@
     </summary>
     
     
-      <category term="工具" scheme="http://yoursite.com/categories/%E5%B7%A5%E5%85%B7/"/>
+      <category term="工具" scheme="https://lazyallen.github.io/categories/%E5%B7%A5%E5%85%B7/"/>
     
     
-      <category term="Java" scheme="http://yoursite.com/tags/Java/"/>
+      <category term="Java" scheme="https://lazyallen.github.io/tags/Java/"/>
     
-      <category term="UnitTest" scheme="http://yoursite.com/tags/UnitTest/"/>
+      <category term="UnitTest" scheme="https://lazyallen.github.io/tags/UnitTest/"/>
     
   </entry>
   
   <entry>
     <title>浅析Docker 独立容器的网络通信模式</title>
-    <link href="http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/"/>
-    <id>http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/</id>
+    <link href="https://lazyallen.github.io/2019/04/17/use-docker-bridge-network-driver/"/>
+    <id>https://lazyallen.github.io/2019/04/17/use-docker-bridge-network-driver/</id>
     <published>2019-04-16T16:00:00.000Z</published>
     <updated>2022-12-07T07:05:25.896Z</updated>
     
@@ -252,19 +252,19 @@
     </summary>
     
     
-      <category term="Docker" scheme="http://yoursite.com/categories/Docker/"/>
+      <category term="Docker" scheme="https://lazyallen.github.io/categories/Docker/"/>
     
     
-      <category term="Bridge" scheme="http://yoursite.com/tags/Bridge/"/>
+      <category term="Bridge" scheme="https://lazyallen.github.io/tags/Bridge/"/>
     
-      <category term="Network" scheme="http://yoursite.com/tags/Network/"/>
+      <category term="Network" scheme="https://lazyallen.github.io/tags/Network/"/>
     
   </entry>
   
   <entry>
     <title>解惑：究竟什么是IOC（控制反转）？</title>
-    <link href="http://yoursite.com/2019/04/10/what-is-ioc/"/>
-    <id>http://yoursite.com/2019/04/10/what-is-ioc/</id>
+    <link href="https://lazyallen.github.io/2019/04/10/what-is-ioc/"/>
+    <id>https://lazyallen.github.io/2019/04/10/what-is-ioc/</id>
     <published>2019-04-09T16:00:00.000Z</published>
     <updated>2022-12-07T07:05:38.406Z</updated>
     
@@ -277,10 +277,10 @@
     </summary>
     
     
-      <category term="解惑" scheme="http://yoursite.com/categories/%E8%A7%A3%E6%83%91/"/>
+      <category term="解惑" scheme="https://lazyallen.github.io/categories/%E8%A7%A3%E6%83%91/"/>
     
     
-      <category term="IOC" scheme="http://yoursite.com/tags/IOC/"/>
+      <category term="IOC" scheme="https://lazyallen.github.io/tags/IOC/"/>
     
   </entry>
   
