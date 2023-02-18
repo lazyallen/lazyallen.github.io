@@ -1,34 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://yoursite.com/2022/12/01/state-in-code-design-and-service-design/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2022/03/07/Unit-Testing-Specification-and-Practice/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/use-docker-bridge-network-driver/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2020/07/02/jenkins-groovy-script-console/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/unit-test-littile-share/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2019/09/24/xxl-job-survey/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/xxl-job-survey/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2019/04/10/what-is-ioc/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/what-is-ioc/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/jenkins-groovy-script-console/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2019/08/11/unit-test-littile-share/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/read-code-mybatis-configuration/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2019/10/11/state-in-code-design-and-service-design/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/spring-boot-properties-binder/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2019/11/21/spring-boot-properties-binder/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/java-spi-think/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2020/05/12/read-code-mybatis-configuration/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>  <url>
-    <loc>http://yoursite.com/2022/12/01/dubbo-event-driven-introduction/</loc>
-    <lastmod>2022-12-01</lastmod>
+    <loc>http://yoursite.com/2020/10/02/java-spi-think/</loc>
+    <lastmod>2022-12-07</lastmod>
+  </url>  <url>
+    <loc>http://yoursite.com/2020/11/07/dubbo-event-driven-introduction/</loc>
+    <lastmod>2022-12-07</lastmod>
   </url>
 </urlset>

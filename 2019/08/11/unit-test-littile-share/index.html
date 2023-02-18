@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>单元测试:从Junit到Powermock | Hexo</title>
+  <meta name="description" content="本文介绍的是Java语言的单元测试框架，分别介绍Junit、Mockito、Powermock三种工具的特点，并附上了用于演示的Demo案例。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="单元测试:从Junit到Powermock">
+<meta property="og:url" content="http://yoursite.com/2019/08/11/unit-test-littile-share/index.html">
+<meta property="og:site_name" content="Allen">
+<meta property="og:description" content="本文介绍的是Java语言的单元测试框架，分别介绍Junit、Mockito、Powermock三种工具的特点，并附上了用于演示的Demo案例。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-08-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-07T07:05:13.216Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="UnitTest">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://yoursite.com/2019/08/11/unit-test-littile-share/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Allen" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lazyallen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">lazyallen</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">No one</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SPI/">SPI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/UT/">UT</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bridge/" rel="tag">Bridge</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CICD/" rel="tag">CICD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Dubbo/" rel="tag">Dubbo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Groovy/" rel="tag">Groovy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/" rel="tag">IOC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Network/" rel="tag">Network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UnitTest/" rel="tag">UnitTest</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A7%84%E8%8C%83/" rel="tag">规范</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Bridge/" style="font-size: 13px;">Bridge</a> <a href="/tags/CICD/" style="font-size: 13px;">CICD</a> <a href="/tags/Dubbo/" style="font-size: 13px;">Dubbo</a> <a href="/tags/Groovy/" style="font-size: 13px;">Groovy</a> <a href="/tags/IOC/" style="font-size: 13px;">IOC</a> <a href="/tags/Java/" style="font-size: 14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 13px;">Jenkins</a> <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/Network/" style="font-size: 13px;">Network</a> <a href="/tags/Spring-Boot/" style="font-size: 13px;">Spring Boot</a> <a href="/tags/UnitTest/" style="font-size: 13px;">UnitTest</a> <a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" style="font-size: 13px;">任务调度</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 14px;">分布式</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a> <a href="/tags/%E8%A7%84%E8%8C%83/" style="font-size: 13px;">规范</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/UT/">UT</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/03/07/Unit-Testing-Specification-and-Practice/" class="title">单元测试规范和实践</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-03-06T16:00:00.000Z" itemprop="datePublished">2022-03-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RPC/">RPC</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/07/dubbo-event-driven-introduction/" class="title">浅析Dubbo的事件驱动机制</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-06T16:00:00.000Z" itemprop="datePublished">2020-11-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/SPI/">SPI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/10/02/java-spi-think/" class="title">解惑：对于SPI的一些理解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-10-01T16:00:00.000Z" itemprop="datePublished">2020-10-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/07/02/jenkins-groovy-script-console/" class="title">Groovy Script Console：如何找出Jenkins中所有授信失效的项目</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-07-01T16:00:00.000Z" itemprop="datePublished">2020-07-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/05/12/read-code-mybatis-configuration/" class="title">深入浅出MyBatis 源码：配置文件解析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-05-11T16:00:00.000Z" itemprop="datePublished">2020-05-12</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-number">1.</span> <span class="toc-text">什么是单元测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="toc-number">2.</span> <span class="toc-text">单元测试的好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%81%9A%E5%A5%BD%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text">如何做好单元测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9C%80%E8%A6%81%E6%B5%8B%E8%AF%95%E5%93%AA%E4%BA%9B%E4%B8%9C%E8%A5%BF%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">需要测试哪些东西：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%A5%BD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">什么是好的单元测试：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E7%9A%84%E4%B8%89%E4%B8%AA%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.3.</span> <span class="toc-text">单元测试的三个步骤</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8Spring%E4%B8%AD%E4%BD%BF%E7%94%A8Junit%E8%BF%9B%E8%A1%8C%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-number">4.</span> <span class="toc-text">在Spring中使用Junit进行单元测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%BF%E9%87%8C%E4%BB%A3%E7%A0%81%E8%A7%84%E7%BA%A6%E6%89%8B%E5%86%8C%E4%B8%AD%E5%87%A0%E6%9D%A1%E5%85%B3%E4%BA%8E%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E7%9A%84%E5%BC%BA%E5%88%B6%E8%A7%84%E8%8C%83"><span class="toc-number">4.1.</span> <span class="toc-text">阿里代码规约手册中几条关于单元测试的强制规范</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Junit%E4%BB%8B%E7%BB%8D%E5%92%8C%E5%85%A5%E9%97%A8"><span class="toc-number">4.2.</span> <span class="toc-text">Junit介绍和入门</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8assertThat%E8%AF%AD%E6%B3%95"><span class="toc-number">4.3.</span> <span class="toc-text">使用assertThat语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%B3%A8%E8%A7%A3%E4%BB%8B%E7%BB%8D"><span class="toc-number">4.4.</span> <span class="toc-text">常见注解介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Mockito%E6%A8%A1%E6%8B%9F%E6%9D%A5Mock%E5%AF%B9%E8%B1%A1"><span class="toc-number">4.5.</span> <span class="toc-text">使用Mockito模拟来Mock对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81Mock"><span class="toc-number">4.6.</span> <span class="toc-text">为什么需要Mock</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mockito%E4%BB%8B%E7%BB%8D%E5%92%8C%E5%85%A5%E9%97%A8"><span class="toc-number">4.7.</span> <span class="toc-text">Mockito介绍和入门</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E5%87%A0%E4%B8%AA%E6%B3%A8%E8%A7%A3%EF%BC%9A"><span class="toc-number">4.8.</span> <span class="toc-text">常用的几个注解：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PowerMockito%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="toc-number">4.9.</span> <span class="toc-text">PowerMockito解决了什么问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Maven%E4%BE%9D%E8%B5%96"><span class="toc-number">4.10.</span> <span class="toc-text">Maven依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mock%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95"><span class="toc-number">4.11.</span> <span class="toc-text">mock静态方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mock%E7%A7%81%E6%9C%89%E6%96%B9%E6%B3%95"><span class="toc-number">4.12.</span> <span class="toc-text">mock私有方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">引用</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-unit-test-littile-share" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      单元测试:从Junit到Powermock
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/08/11/unit-test-littile-share/" class="article-date">
+	  <time datetime="2019-08-10T16:00:00.000Z" itemprop="datePublished">2019-08-11</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/Java/" rel="tag">Java</a>, <a class="article-tag-link-link" href="/tags/UnitTest/" rel="tag">UnitTest</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/08/11/unit-test-littile-share/" class="leancloud_visitors"  data-flag-title="单元测试:从Junit到Powermock">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/08/11/unit-test-littile-share/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.5k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 16(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>本文介绍的是Java语言的单元测试框架，分别介绍Junit、Mockito、Powermock三种工具的特点，并附上了用于演示的Demo案例。</p>
+<span id="more"></span>
+
+<h2 id="什么是单元测试"><a href="#什么是单元测试" class="headerlink" title="什么是单元测试"></a>什么是单元测试</h2><p>单元测试是指，对软件中的最⼩可测试单元在与程序其他部分相隔离的情况下进⾏<br>检查和验证的⼯作，这⾥的最⼩可测试单元通常是指函数或者类。</p>
+<h2 id="单元测试的好处"><a href="#单元测试的好处" class="headerlink" title="单元测试的好处"></a>单元测试的好处</h2><p>单元测试通常由开发⼯程师完成，⼀般会伴随开发代码⼀起递交⾄代码库。单元测试属于最严格<br>的软件测试⼿段，是最接近代码底层实现的验证⼿段，可以在软件开发的早期以最⼩的成本保证<br>局部代码的质量。</p>
+<h2 id="如何做好单元测试"><a href="#如何做好单元测试" class="headerlink" title="如何做好单元测试"></a>如何做好单元测试</h2><h3 id="需要测试哪些东西："><a href="#需要测试哪些东西：" class="headerlink" title="需要测试哪些东西："></a>需要测试哪些东西：</h3><ul>
+<li>结果是否正确</li>
+<li>边界条件<ul>
+<li>空值或者不完整的值</li>
+<li>格式错误的数据</li>
+<li>完全伪造或者不一致的输入数据</li>
+<li>意料之外的值</li>
+</ul>
+</li>
+<li>检查反向关联<ul>
+<li>为了检查数据是否插入成功，检查能否查询出来</li>
+</ul>
+</li>
+<li>检查异常：强制检查异常情况</li>
+<li>性能特性</li>
+</ul>
+<h3 id="什么是好的单元测试："><a href="#什么是好的单元测试：" class="headerlink" title="什么是好的单元测试："></a>什么是好的单元测试：</h3><ul>
+<li>自动化</li>
+<li>独立性</li>
+<li>可重复</li>
+</ul>
+<h3 id="单元测试的三个步骤"><a href="#单元测试的三个步骤" class="headerlink" title="单元测试的三个步骤"></a>单元测试的三个步骤</h3><ul>
+<li>准备数据、行为</li>
+<li>测试目标模块</li>
+<li>验证测试结果</li>
+</ul>
+<h2 id="在Spring中使用Junit进行单元测试"><a href="#在Spring中使用Junit进行单元测试" class="headerlink" title="在Spring中使用Junit进行单元测试"></a>在Spring中使用Junit进行单元测试</h2><h3 id="阿里代码规约手册中几条关于单元测试的强制规范"><a href="#阿里代码规约手册中几条关于单元测试的强制规范" class="headerlink" title="阿里代码规约手册中几条关于单元测试的强制规范"></a>阿里代码规约手册中几条关于单元测试的强制规范</h3><ul>
+<li>不允许使用<code>syetem.out</code>进行人肉验证，必须使用<code>assert</code>进行验证</li>
+<li>保持单元测试的独立性，每一个测试案例互不影响</li>
+<li>核心业务，核心代码，核心模块的新增代码必须保证单元测试通过</li>
+</ul>
+<h3 id="Junit介绍和入门"><a href="#Junit介绍和入门" class="headerlink" title="Junit介绍和入门"></a>Junit介绍和入门</h3><p><code>Junit</code>是一套框架（用于<code>JAVA</code>语言），由 <code>Erich Gamma</code>和 <code>Kent Beck</code> 编写的一个回归测试框架<code>（regression testing framework）</code>，即用于白盒测试。现阶段的最新版本号是<code>4.12</code>，<code>JUnit5</code>目前正在测试中，所以这里还是以<code>JUnit4</code>为准。</p>
+<h3 id="使用assertThat语法"><a href="#使用assertThat语法" class="headerlink" title="使用assertThat语法"></a>使用assertThat语法</h3><p><code>JUnit4.4</code>引入了<code>Hamcrest</code>框架(匹配器框架)，<code>Hamcest</code>提供了一套匹配符<code>Matcher</code>，这些匹配符更接近自然语言，可读性高，更加灵活。使用全新的断言语法：<code>assertThat</code>，结合<code>Hamcest</code>提供的匹配符，只用这一个方法，就可以实现所有的测试。</p>
+<p><code>assertThat</code>语法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">assertThat(T actual, Matcher&lt;T&gt; matcher);</span><br><span class="line">assertThat(String reason, T actual, Matcher&lt;T&gt; matcher);</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>actual</code>为需要测试的变量，<code>matcher</code>为使用<code>Hamcrest</code>的匹配符来表达变量<code>actual</code>期望值的声明。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">assertThat( testedNumber, allOf( greaterThan(<span class="number">8</span>), lessThan(<span class="number">16</span>) ) );</span><br><span class="line"><span class="comment">//allOf匹配符表明如果接下来的所有条件必须都成立测试才通过，相当于“与”（&amp;&amp;）2、</span></span><br><span class="line">assertThat( testedNumber, anyOf( greaterThan(<span class="number">16</span>), lessThan(<span class="number">8</span>) ) );</span><br><span class="line"><span class="comment">//anyOf匹配符表明如果接下来的所有条件只要有一个成立则测试通过，相当于“或”（||）</span></span><br><span class="line">assertThat( testedString, containsString( <span class="string">&quot;developerWorks&quot;</span> ) );</span><br><span class="line"><span class="comment">//containsString匹配符表明如果测试的字符串testedString包含子字符串&quot;developerWorks&quot;则测试通过</span></span><br><span class="line">assertThat( testedNumber, greaterThan(<span class="number">16.0</span>) );</span><br><span class="line"><span class="comment">//greaterThan匹配符表明如果所测试的数值testedNumber大于16.0则测试通过</span></span><br><span class="line">assertThat( iterableObject, hasItem ( <span class="string">&quot;element&quot;</span> ) );</span><br><span class="line"><span class="comment">//hasItem匹配符表明如果测试的迭代对象iterableObject含有元素“element”项则测试通过</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="常见注解介绍"><a href="#常见注解介绍" class="headerlink" title="常见注解介绍"></a>常见注解介绍</h3><p>引入依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.12<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hamcrest<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hamcrest-library<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>新建一个测试用的类：<code>Calculator</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Objects;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Calculator</span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> Double <span class="title function_">addition</span><span class="params">(Double x,Double y)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (Objects.isNull(x) || Objects.isNull(y)) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;参数不能为空&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> x+y;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> Double <span class="title function_">division</span><span class="params">(Double x, <span class="type">int</span> y)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="number">0</span>==y)&#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;除数y不能为0&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> x/y;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> Double <span class="title function_">multiplication</span><span class="params">(Double x, Double y)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (Objects.isNull(x) || Objects.isNull(y)) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;参数不能为空&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> x*y;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">version</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.printf(<span class="string">&quot;v1.0&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>生成对应的测试类:<code>CalculatorTest</code>。</p>
+<p>小技巧：在<code>IDEA</code>中，使用<code>ctrl + shift +  T</code> 的快捷键可以快速生成测试类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.Before;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"><span class="keyword">import</span> org.mockito.InjectMocks;</span><br><span class="line"><span class="keyword">import</span> org.mockito.Mock;</span><br><span class="line"><span class="keyword">import</span> org.mockito.MockitoAnnotations;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.Mockito.*;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.*;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.hamcrest.Matchers.is;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AccountantTest</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Mock</span></span><br><span class="line">	Calculator calculator;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@InjectMocks</span></span><br><span class="line">	Accountant accountant;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUp</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="comment">// 初始化测试用例类中由Mockito的注解标注的所有模拟对象</span></span><br><span class="line">		MockitoAnnotations.initMocks(<span class="built_in">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCalculateSalary</span><span class="params">()</span> &#123;</span><br><span class="line">		when(calculator.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">20.0</span>);</span><br><span class="line">		when(calculator.multiplication(anyDouble(),anyDouble())).thenReturn(<span class="number">16.0</span>);</span><br><span class="line">		<span class="type">Double</span> <span class="variable">salary</span> <span class="operator">=</span> accountant.calculateSalary(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line">		assertThat(salary,is(<span class="number">16.0</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Test</code>注解有两个可选的参数，分别为<code>timeout</code>和<code>expectd</code>。除<code>@Test</code>注解之外，还有如下注解：</p>
+<ul>
+<li><code>@Before</code> 注解的作用是使被标记的方法在测试类里每个方法执行前调用；同理 <code>After</code> 使被标记方法在当前测试类里每个方法执行后调用。</li>
+<li><code>@BeforeClass</code> 注解的作用是使被标记的方法在当前测试类被实例化前调用；同理 <code>@AfterClass</code> 使被标记的方法在测试类被实例化后调用。</li>
+<li><code>@Ignore</code> 注解的作用是使被标记方法暂时不执行。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.hamcrest.Matchers.is;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.assertThat;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Calculatortest2</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Calculatortest2</span><span class="params">()</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;Constructor&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@BeforeClass</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">beforeThis</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;BeforeClass&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@AfterClass</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">afterThis</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;AfterClass&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUp</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;Before&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@After</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">tearDown</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;After&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">evaluate</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="type">Calculator</span> <span class="variable">calculator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Calculator</span>();</span><br><span class="line">		<span class="type">int</span> <span class="variable">sum</span> <span class="operator">=</span> calculator.addition(<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">		assertThat(sum, is(<span class="number">2</span>));</span><br><span class="line">		System.out.println(<span class="string">&quot;Test evaluate&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">idiot</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;Test idiot&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Ignore</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">ignoreMe</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;Ignore&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">BeforeClass</span><br><span class="line">Constructor</span><br><span class="line">Before</span><br><span class="line">Test idiot</span><br><span class="line">After</span><br><span class="line">Constructor</span><br><span class="line">Before</span><br><span class="line">Test evaluate</span><br><span class="line">After</span><br><span class="line">AfterClass</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+
+<p>从控制台输出可以得到以下两点信息：</p>
+<ul>
+<li>测试类在测试每一个<code>case</code>时，会重新实例化一次测试类，为的是保证每个<code>case</code>是独立隔离的。</li>
+<li><code>BeforeClass</code>是在测试类初始化之前执行，<code>Before</code>是在每一个<code>case</code>运行前执行，我们可以用该注解在测试类初始化的时候准备一些测试的数据。</li>
+</ul>
+<h3 id="使用Mockito模拟来Mock对象"><a href="#使用Mockito模拟来Mock对象" class="headerlink" title="使用Mockito模拟来Mock对象"></a>使用Mockito模拟来Mock对象</h3><h3 id="为什么需要Mock"><a href="#为什么需要Mock" class="headerlink" title="为什么需要Mock"></a>为什么需要Mock</h3><p>在做单元测试的时候，经常出现这样的情况，在需要测试中模块中包含其他依赖的模块，有时候去对这个依赖的模块做单元测试比较高，或者无法进行单元测试。例如，在<code>Java Web</code>项目中通常是分层的，我们需要对<code>Service</code>层进行单元测试，由于<code>Service</code>需要依赖<code>Dao</code>层，我们又不希望对<code>Service</code>的同时又为<code>Dao</code>层做一些初始化的工作从而保证测试通过，就可以将<code>Dao</code>层<code>Mock</code>出来。<code>Mock</code>出来的对象不是真实的对象，而是具备和真实对象相同行为的对象。比如<code>List mockList = mock(List.class)</code>，这个<code>mockList</code>并不是真实的<code>List</code>，但同样又<code>add()</code>,<code>clear()</code>,<code>size()</code>等方法。</p>
+<h3 id="Mockito介绍和入门"><a href="#Mockito介绍和入门" class="headerlink" title="Mockito介绍和入门"></a>Mockito介绍和入门</h3><p><code>Mockito</code> 是 <code>Mock</code> 数据的测试框架，简化了对有外部依赖的类的单元测试。</p>
+<h3 id="常用的几个注解："><a href="#常用的几个注解：" class="headerlink" title="常用的几个注解："></a>常用的几个注解：</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mockito<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mockito-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.23.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里我们写一个会计师类：<code>Accountant</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Accountant</span> &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Double</span> <span class="variable">tax</span> <span class="operator">=</span> <span class="number">0.2</span>;</span><br><span class="line">	Calculator calculator;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> Double <span class="title function_">calculateSalary</span><span class="params">(Double a, Double b)</span>&#123;</span><br><span class="line">		<span class="type">Double</span> <span class="variable">entireSalary</span> <span class="operator">=</span> calculator.addition(a,b);</span><br><span class="line">		<span class="type">Double</span> <span class="variable">deservedSalary</span> <span class="operator">=</span> calculator.multiplication(entireSalary,(<span class="number">1</span>-tax));</span><br><span class="line">		<span class="keyword">return</span> deservedSalary;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> Double <span class="title function_">calculateOddMonthSalary</span><span class="params">(Double a, Double b)</span>&#123;</span><br><span class="line">		<span class="type">int</span> <span class="variable">month</span> <span class="operator">=</span> DateUtils.getCurrentMonth();</span><br><span class="line">		<span class="keyword">if</span>(month%<span class="number">2</span>!=<span class="number">0</span>)&#123;</span><br><span class="line">			<span class="type">Double</span> <span class="variable">entireSalary</span> <span class="operator">=</span> calculator.addition(a,b);</span><br><span class="line">			<span class="type">Double</span> <span class="variable">deservedSalary</span> <span class="operator">=</span> calculator.multiplication(entireSalary,(<span class="number">1</span>-tax));</span><br><span class="line">			<span class="keyword">return</span> deservedSalary;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0.0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> String <span class="title function_">sayHello</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">printSayHello</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="type">String</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="built_in">this</span>.sayHello();</span><br><span class="line">		System.out.println(hello);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Accountant</span><span class="params">(Calculator calculator)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.calculator = calculator;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Accountant</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的测试类：</p>
+<p>小技巧：静态导入 <code>org.mockito.Mockito.*</code>;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.Before;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"><span class="keyword">import</span> org.mockito.InjectMocks;</span><br><span class="line"><span class="keyword">import</span> org.mockito.MockitoAnnotations;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.hamcrest.Matchers.is;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.assertThat;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.ArgumentMatchers.anyDouble;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.Mockito.mock;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.Mockito.when;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AccountantTest2</span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	Calculator calculator;</span><br><span class="line">	Accountant accountant;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUp</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		calculator = mock(Calculator.class);</span><br><span class="line">		accountant = <span class="keyword">new</span> <span class="title class_">Accountant</span>(calculator);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCalculateSalaryUseMockMethod</span><span class="params">()</span> &#123;</span><br><span class="line">		when(calculator.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">20.0</span>);</span><br><span class="line">		when(calculator.multiplication(anyDouble(),anyDouble())).thenReturn(<span class="number">80.0</span>);</span><br><span class="line">		<span class="type">Double</span> <span class="variable">salary</span> <span class="operator">=</span> accountant.calculateSalary(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line">		assertThat(salary,is(<span class="number">80.0</span>));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Mockito</code> 支持通过静态方法<code>mock()</code> 来 <code>Mock</code> 对象，或者通过 <code>@Mock</code> 注解，来创建 <code>Mock</code> 对象。</p>
+<p>假如说，你需要使用<code>@Mock</code>注解，则需要初始化测试用例类中由<code>Mockito</code>的注解标注的所有模拟对象，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.Before;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"><span class="keyword">import</span> org.mockito.InjectMocks;</span><br><span class="line"><span class="keyword">import</span> org.mockito.Mock;</span><br><span class="line"><span class="keyword">import</span> org.mockito.MockitoAnnotations;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.Mockito.*;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.*;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.hamcrest.Matchers.is;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AccountantTest</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Mock</span></span><br><span class="line">	Calculator calculator;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@InjectMocks</span></span><br><span class="line">	Accountant accountant;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUp</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="comment">// 初始化测试用例类中由Mockito的注解标注的所有模拟对象</span></span><br><span class="line">		MockitoAnnotations.initMocks(<span class="built_in">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCalculateSalary</span><span class="params">()</span> &#123;</span><br><span class="line">		when(calculator.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">20.0</span>);</span><br><span class="line">		when(calculator.multiplication(anyDouble(),anyDouble())).thenReturn(<span class="number">16.0</span>);</span><br><span class="line">		<span class="type">Double</span> <span class="variable">salary</span> <span class="operator">=</span> accountant.calculateSalary(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line">		assertThat(salary,is(<span class="number">16.0</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>你也可以使用<code>@RunWith(MockitoJUnitRunner.class)</code>去代替<code>MockitoAnnotations.initMocks(this)</code>;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.Before;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith;</span><br><span class="line"><span class="keyword">import</span> org.mockito.InjectMocks;</span><br><span class="line"><span class="keyword">import</span> org.mockito.Matchers;</span><br><span class="line"><span class="keyword">import</span> org.mockito.Mock;</span><br><span class="line"><span class="keyword">import</span> org.mockito.MockitoAnnotations;</span><br><span class="line"><span class="keyword">import</span> org.mockito.junit.MockitoJUnitRunner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.hamcrest.Matchers.is;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.assertThat;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.ArgumentMatchers.anyDouble;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.Mockito.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RunWith(MockitoJUnitRunner.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AccountantTest3</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Mock</span></span><br><span class="line">	Calculator calculator;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@InjectMocks</span></span><br><span class="line">	Accountant accountant;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCalculateSalary</span><span class="params">()</span> &#123;</span><br><span class="line">		when(calculator.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">20.0</span>);</span><br><span class="line">		when(calculator.multiplication(anyDouble(),anyDouble())).thenReturn(<span class="number">16.0</span>);</span><br><span class="line">		<span class="type">Double</span> <span class="variable">salary</span> <span class="operator">=</span> accountant.calculateSalary(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line">		assertThat(salary,is(<span class="number">16.0</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test(expected = NullPointerException.class)</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCalculateSalary1</span><span class="params">()</span>&#123;</span><br><span class="line">		when(calculator.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">100.0</span>).thenThrow(<span class="keyword">new</span> <span class="title class_">NullPointerException</span>());</span><br><span class="line">		<span class="type">Double</span> <span class="variable">mockResult</span> <span class="operator">=</span> calculator.addition(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line">		System.out.println(<span class="string">&quot;mockResult&quot;</span>+mockResult);</span><br><span class="line">		calculator.addition(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常建议使用<code>@RunWith(MockitoJUnitRunner.class)</code>的方式去初始化测试用例类中由<code>Mockito</code>的注解标注的所有模拟对象。</p>
+<p><code>mock</code> 出来的对象拥有和源对象同样的方法和属性，<code>when()</code> 和 <code>thenReturn()</code> 方法是对源对象的配置，怎么理解，就是说在第一步 <code>mock()</code> 时，<code>mock</code> 出来的对象还不具备被 <code>Mock</code> 对象实例的行为特征，而 <code>when(...).thenReturn(...)</code> 就是根据条件去配置源对象的预期行为。</p>
+<p>有时我们需要为同一个函数调用的不同的返回值或异常做测试桩。典型的运用就是使用<code>mock</code>迭代器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testMockIterator</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="type">Iterator</span> <span class="variable">i</span> <span class="operator">=</span> mock(Iterator.class);</span><br><span class="line">		when(i.next()).thenReturn(<span class="string">&quot;hello&quot;</span>,<span class="string">&quot;world&quot;</span>);</span><br><span class="line">		<span class="comment">//when(i.next()).thenReturn(&quot;hello&quot;).thenReturn(&quot;world&quot;);</span></span><br><span class="line">		<span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> i.next() + <span class="string">&quot; &quot;</span> + i.next();</span><br><span class="line">		assertThat(result,is(<span class="string">&quot;hello world&quot;</span>));</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>除了对方法调用结果是否正确的测试，有时还需要验证一些方法的行为，比如验证方法被调用的次数，验证方法的入参等，<code>Mockito</code> 通过 <code>verify()</code> 方法实现这些场景的测试需求。这被称为“行为测试”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testVerify</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="type">Calculator</span> <span class="variable">mock</span> <span class="operator">=</span> mock(Calculator.class);</span><br><span class="line">		when(mock.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">2.0</span>);</span><br><span class="line"></span><br><span class="line">		mock.addition(<span class="number">1.0</span>,<span class="number">1.0</span>);</span><br><span class="line">		mock.version();</span><br><span class="line">		mock.version();</span><br><span class="line"></span><br><span class="line">		<span class="comment">//比如说写Controller的单元测试，验证service方法是否调用</span></span><br><span class="line">		verify(mock, times(<span class="number">2</span>)).version();</span><br><span class="line">		verify(mock, never()).multiplication(anyDouble(),anyDouble());</span><br><span class="line">		verify(mock, atLeastOnce()).version();</span><br><span class="line">		verify(mock, atLeast(<span class="number">2</span>)).version();</span><br><span class="line">		verify(mock, atMost(<span class="number">3</span>)).version();;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Mockito</code> 支持通过 <code>@Spy</code> 注解或 <code>spy()</code> 方法包裹实际对象，除非明确指定对象，否则都会调用包裹后的对象。这种方式实现了对实际对象的部分自定义修改。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testDifferMockSpy</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="type">List</span> <span class="variable">mock</span> <span class="operator">=</span> mock(ArrayList.class);</span><br><span class="line">		mock.add(<span class="string">&quot;one&quot;</span>);</span><br><span class="line">		verify(mock).add(<span class="string">&quot;one&quot;</span>);</span><br><span class="line">		System.out.println(<span class="string">&quot;mock[0]:&quot;</span>+mock.get(<span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">		<span class="type">List</span> <span class="variable">spy</span> <span class="operator">=</span> spy(<span class="keyword">new</span> <span class="title class_">ArrayList</span>());</span><br><span class="line">		spy.add(<span class="string">&quot;one&quot;</span>);</span><br><span class="line">		verify(spy).add(<span class="string">&quot;one&quot;</span>);</span><br><span class="line">		System.out.println(<span class="string">&quot;spy[0]:&quot;</span>+spy.get(<span class="number">0</span>));</span><br><span class="line">		when(spy.size()).thenReturn(<span class="number">100</span>);</span><br><span class="line">		System.out.println(<span class="string">&quot;spy.size:&quot;</span>+spy.size());</span><br><span class="line"></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="PowerMockito解决了什么问题"><a href="#PowerMockito解决了什么问题" class="headerlink" title="PowerMockito解决了什么问题"></a>PowerMockito解决了什么问题</h3><p><code>Mockito</code> 因为可以极大地简化单元测试的书写过程而被许多人应用在自己的工作中，但是Mock 工具不可以实现对静态函数、构造函数、私有函数、Final 函数以及系统函数的模拟，<code>PowerMock</code> 是在 <code>EasyMock</code> 以及 <code>Mockito</code> 基础上的扩展，通过定制类加载器等技术，<code>PowerMock</code> 实现了之前提到的所有模拟功能，使其成为大型系统上单元测试中的必备工具。</p>
+<h3 id="Maven依赖"><a href="#Maven依赖" class="headerlink" title="Maven依赖"></a>Maven依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.powermock<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>powermock-module-junit4<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.0-RC.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.powermock<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>powermock-api-mockito2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.0-RC.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="mock静态方法"><a href="#mock静态方法" class="headerlink" title="mock静态方法"></a>mock静态方法</h3><p>通常，在一些工具类中会又很多静态方法，比如，我们新建一个工具类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.LocalDate;</span><br><span class="line"><span class="keyword">import</span> java.time.LocalDateTime;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DateUtils</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">getCurrentMonth</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="type">LocalDate</span> <span class="variable">now</span> <span class="operator">=</span> LocalDate.now();</span><br><span class="line">		<span class="keyword">return</span> now.getMonthValue();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相应的测试类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lazyallen.blog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javafx.beans.binding.When;</span><br><span class="line"><span class="keyword">import</span> org.junit.Before;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith;</span><br><span class="line"><span class="keyword">import</span> org.mockito.InjectMocks;</span><br><span class="line"><span class="keyword">import</span> org.mockito.Mock;</span><br><span class="line"><span class="keyword">import</span> org.powermock.api.mockito.PowerMockito;</span><br><span class="line"><span class="keyword">import</span> org.powermock.core.classloader.annotations.PrepareForTest;</span><br><span class="line"><span class="keyword">import</span> org.powermock.modules.junit4.PowerMockRunner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.hamcrest.Matchers.is;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.assertThat;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.ArgumentMatchers.anyDouble;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mockito.Mockito.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> allen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2019-06-09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RunWith(PowerMockRunner.class)</span></span><br><span class="line"><span class="meta">@PrepareForTest(&#123;DateUtils.class,Accountant.class&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AccountantTest4</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Mock</span></span><br><span class="line">	Calculator calculator;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@InjectMocks</span></span><br><span class="line">	Accountant accountant;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;</span><br><span class="line">		PowerMockito.mockStatic(DateUtils.class);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCalculateOddMonthSalary</span><span class="params">()</span>&#123;</span><br><span class="line">		PowerMockito.when(DateUtils.getCurrentMonth()).thenReturn(<span class="number">7</span>);</span><br><span class="line">		when(calculator.addition(anyDouble(),anyDouble())).thenReturn(<span class="number">20.0</span>);</span><br><span class="line">		when(calculator.multiplication(anyDouble(),anyDouble())).thenReturn(<span class="number">16.0</span>);</span><br><span class="line">		<span class="type">Double</span> <span class="variable">salary</span> <span class="operator">=</span> accountant.calculateOddMonthSalary(<span class="number">10.0</span>,<span class="number">10.0</span>);</span><br><span class="line">		assertThat(salary,is(<span class="number">16.0</span>));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>只需要注意两点：</p>
+<ul>
+<li>@RunWith(PowerMockRunner.class)</li>
+<li>@PrepareForTest({DateUtils.class,Accountant.class})</li>
+</ul>
+<h3 id="mock私有方法"><a href="#mock私有方法" class="headerlink" title="mock私有方法"></a>mock私有方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testPrivate</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="type">Accountant</span> <span class="variable">accountant1</span> <span class="operator">=</span> PowerMockito.spy(<span class="keyword">new</span> <span class="title class_">Accountant</span>());</span><br><span class="line">		PowerMockito.when(accountant1, <span class="string">&quot;sayHello&quot;</span>).thenReturn(<span class="string">&quot;你好&quot;</span>);</span><br><span class="line">		accountant1.printSayHello();</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><ul>
+<li><a href=""[https://github.com/hehonghui/mockito-doc-zh#10](https://github.com/hehonghui/mockito-doc-zh#10)"">Mockito框架中文文档</a></li>
+<li><a href=""[https://github.com/lazyallen/blog-unit-test](https://github.com/lazyallen/blog-unit-test)"">代码示例</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://yoursite.com/2019/08/11/unit-test-littile-share/" title="单元测试:从Junit到Powermock" target="_blank" rel="external">http://yoursite.com/2019/08/11/unit-test-littile-share/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lazyallen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lazyallen" target="_blank"><span class="text-dark">lazyallen</span><small class="ml-1x">No one</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/09/24/xxl-job-survey/" title="XXL-JOB 分布式任务调度平台调研使用分析"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/04/17/use-docker-bridge-network-driver/" title="浅析Docker 独立容器的网络通信模式"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: 'dFjUZtZHQkj381ud5aooTo7U-gzGzoHsz',
+  appKey: '6s4k8JcIPxZ6u9Dwmw4CrLch'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 's1NTgTtFG2fGcypwMSm6Q6Gi-gzGzoHsz',
+    appKey: 'sfruutrdOr8aDHGb96QGfh94',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>浅析Docker 独立容器的网络通信模式 | Hexo</title>
+  <meta name="description" content="很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析Docker 独立容器的网络通信模式">
+<meta property="og:url" content="http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/index.html">
+<meta property="og:site_name" content="Allen">
+<meta property="og:description" content="很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/04/02/15855902431392.jpg">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/04/02/15858380387811.jpg">
+<meta property="article:published_time" content="2019-04-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-07T07:05:25.896Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Bridge">
+<meta property="article:tag" content="Network">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/04/02/15855902431392.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Allen" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lazyallen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">lazyallen</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">No one</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SPI/">SPI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/UT/">UT</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bridge/" rel="tag">Bridge</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CICD/" rel="tag">CICD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Dubbo/" rel="tag">Dubbo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Groovy/" rel="tag">Groovy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/" rel="tag">IOC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Network/" rel="tag">Network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UnitTest/" rel="tag">UnitTest</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A7%84%E8%8C%83/" rel="tag">规范</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Bridge/" style="font-size: 13px;">Bridge</a> <a href="/tags/CICD/" style="font-size: 13px;">CICD</a> <a href="/tags/Dubbo/" style="font-size: 13px;">Dubbo</a> <a href="/tags/Groovy/" style="font-size: 13px;">Groovy</a> <a href="/tags/IOC/" style="font-size: 13px;">IOC</a> <a href="/tags/Java/" style="font-size: 14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 13px;">Jenkins</a> <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/Network/" style="font-size: 13px;">Network</a> <a href="/tags/Spring-Boot/" style="font-size: 13px;">Spring Boot</a> <a href="/tags/UnitTest/" style="font-size: 13px;">UnitTest</a> <a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" style="font-size: 13px;">任务调度</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 14px;">分布式</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a> <a href="/tags/%E8%A7%84%E8%8C%83/" style="font-size: 13px;">规范</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/UT/">UT</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/03/07/Unit-Testing-Specification-and-Practice/" class="title">单元测试规范和实践</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-03-06T16:00:00.000Z" itemprop="datePublished">2022-03-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RPC/">RPC</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/07/dubbo-event-driven-introduction/" class="title">浅析Dubbo的事件驱动机制</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-06T16:00:00.000Z" itemprop="datePublished">2020-11-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/SPI/">SPI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/10/02/java-spi-think/" class="title">解惑：对于SPI的一些理解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-10-01T16:00:00.000Z" itemprop="datePublished">2020-10-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/07/02/jenkins-groovy-script-console/" class="title">Groovy Script Console：如何找出Jenkins中所有授信失效的项目</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-07-01T16:00:00.000Z" itemprop="datePublished">2020-07-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/05/12/read-code-mybatis-configuration/" class="title">深入浅出MyBatis 源码：配置文件解析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-05-11T16:00:00.000Z" itemprop="datePublished">2020-05-12</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%90%AD%E5%BB%BAxxl-job-admin-docker-container-%E9%81%87%E5%88%B0%E7%9A%84%E7%96%91%E9%97%AE"><span class="toc-number">1.</span> <span class="toc-text">搭建xxl-job-admin docker container 遇到的疑问</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker-network-drivers-%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">Docker network drivers 介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker-Host-Network-Driver"><span class="toc-number">3.</span> <span class="toc-text">Docker Host Network Driver</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker-Bridge-Network-Driver"><span class="toc-number">4.</span> <span class="toc-text">Docker Bridge Network Driver</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Default-Docker-Bridge-Network"><span class="toc-number">4.1.</span> <span class="toc-text">Default Docker Bridge Network</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Defined-Bridge-Networks"><span class="toc-number">4.2.</span> <span class="toc-text">User-Defined Bridge Networks</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E8%BF%87%E5%A4%B4%E8%A7%A3%E9%87%8A"><span class="toc-number">5.</span> <span class="toc-text">回过头解释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">6.</span> <span class="toc-text">参考链接</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-use-docker-bridge-network-driver" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      浅析Docker 独立容器的网络通信模式
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/04/17/use-docker-bridge-network-driver/" class="article-date">
+	  <time datetime="2019-04-16T16:00:00.000Z" itemprop="datePublished">2019-04-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Docker/">Docker</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/Bridge/" rel="tag">Bridge</a>, <a class="article-tag-link-link" href="/tags/Network/" rel="tag">Network</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/04/17/use-docker-bridge-network-driver/" class="leancloud_visitors"  data-flag-title="浅析Docker 独立容器的网络通信模式">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/04/17/use-docker-bridge-network-driver/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 11(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>很早就接触过Docker容器相关的概念，之前还使用过Jenkins提供的k8s插件进行容器编排。但说实话，自己工作还是生活中使用的比较少，基础处于我知道是怎么样的，但缺乏实践经验。</p>
+<span id="more"></span>
+
+
+
+<h2 id="搭建xxl-job-admin-docker-container-遇到的疑问"><a href="#搭建xxl-job-admin-docker-container-遇到的疑问" class="headerlink" title="搭建xxl-job-admin docker container 遇到的疑问"></a>搭建xxl-job-admin docker container 遇到的疑问</h2><p>在阅读xxl-job的文档时，发现其提供Docker容器部署的方式，于是就在本机装好了Docker环境，实践一番。提前说明一下，本次实验使用的Docker版本为19.03.8。<br>xxl-job-admin的容器部署很简单，一共就分两步：</p>
+<ul>
+<li>先部署一个MySql，部署完需要执行好xxl-job相应的SQL脚本</li>
+<li>再部署xxl-job-admin，其中MySql链接指向刚刚部署好的MySql实例</li>
+</ul>
+<p>部署命令也很简单，一共就3条：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker network create simple-network</span><br><span class="line"></span><br><span class="line">docker run --name xxl-mysql --network simple-network -e MYSQL_ROOT_PASSWORD=123456 -d mysql </span><br><span class="line"></span><br><span class="line">docker run --network simple-network -e PARAMS=&quot;--spring.datasource.url=jdbc:mysql://xxl-mysql:3306/xxl_job?Unicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false --spring.datasource.password=123456&quot; -p 8080:8080 -v /tmp:/data/applogs --name xxl-job-admin  -d xuxueli/xxl-job-admin:2.1.2</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们在结尾再解释为什么是这样写的，我先提出我的困惑。和单机部署应用进程都处在同一个网络环境中不同的是，在同一台主机上的两个容器，他们的网络环境是不是隔离的？如果不是隔离的，容器之间是怎么通信的，容器和宿主机之间又是怎么通行的呢？</p>
+<h2 id="Docker-network-drivers-介绍"><a href="#Docker-network-drivers-介绍" class="headerlink" title="Docker network drivers 介绍"></a>Docker network drivers 介绍</h2><p>在解答疑惑之前，我们需要先了解一下Docker的network驱动，通常情况下，默认是以下几种：</p>
+<ul>
+<li>bridge：默认网络驱动模式，通常如果不特别指定别的网络驱动模式，一般默认就是bridge。</li>
+<li>host：在独立容器中，使用host网络驱动会移除容器和容器主机之间的网络隔离性。也就是说，这个容器和主机的网络环境完全一样。不过目前只在Docker 17.06以上版本支持，且不支持Docker Desktop for Mac, Docker Desktop for Windows, or Docker EE for Windows Server.</li>
+<li>overlay：overlay 网络将多个 Docker 守护进程连接在一起，并使集群服务能够相互通信。您还可以使用 overlay 网络来实现 swarm 集群和独立容器之间的通信，或者不同 Docker 守护进程上的两个独立容器之间的通信。该策略实现了在这些容器之间进行操作系统级别路由的需求。[^cnkirito_footnote]</li>
+<li>macvlan：Macvlan 网络允许为容器分配 MAC 地址，使其显示为网络上的物理设备。 Docker 守护进程通过其 MAC 地址将流量路由到容器。对于希望直连到物理网络的传统应用程序而言，使用 macvlan 模式一般是最佳选择，而不应该通过 Docker 宿主机的网络进行路由。[^cnkirito_footnote]</li>
+<li>none：对于此容器，禁用所有联网。通常与自定义网络驱动程序一起使用。none 模式不适用于集群服务。[^cnkirito_footnote]</li>
+</ul>
+<p>对于运行在一台主机的单独容器而言，只需要关心以上的bridge、host、none。<br>查看当前容器下已有的网络驱动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">04675183a24d        bridge              bridge              local</span><br><span class="line">245b36b452af        host                host                local</span><br><span class="line">43a8d2311d38        none                null                local</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，默认在一个Docker容器中包含三种网络驱动，其中<code>SCOPE</code>指的是网络范围，可以是local或swarm范围。区别在于local是在主机范围内提供连接和网络服务（例如DNS或IPAM）。swarm可跨群群集提供连接和网络服务。swarm网络在整个群集中具有相同的网络ID，而local范围网络在每个主机上具有唯一的网络ID。</p>
+<p>接下来我们主要介绍host并着重介绍bridge网络驱动。</p>
+<h2 id="Docker-Host-Network-Driver"><a href="#Docker-Host-Network-Driver" class="headerlink" title="Docker Host Network Driver"></a>Docker Host Network Driver</h2><p>如果在创建容器时指定<code>--net=host</code>，host网络中的所有容器都可以在宿主机上相互通信。从网络角度来看，这等于在没有容器的主机上运行的多个进程。因为它们使用相同的主机环境，所以没有两个容器能够绑定到相同的TCP端口，如果在同一主机上调度了多个容器，则可能出现端口冲突的情况。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/04/02/15855902431392.jpg" alt=""></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#Create containers on the host network</span><br><span class="line">host $ docker run --rm -itd --net host --name C1 alpine sh</span><br><span class="line"></span><br><span class="line">#Show host eth0</span><br><span class="line">host $ ip -o -4 address show dev eth0 |cut -d’ ‘ -f1-7</span><br><span class="line">2: eth0    inet 172.31.21.213/20</span><br><span class="line"></span><br><span class="line">#Show eth0 from C1</span><br><span class="line">host $ docker exec -it C1 sh</span><br><span class="line">C1 # ip -o -4 address show dev eth0 |cut -d&#x27; &#x27; -f1-7</span><br><span class="line">2: eth0    inet 172.31.21.213/20</span><br></pre></td></tr></table></figure>
+
+<p>可见，C1和宿主机的公用一套网络环境，所以eth0网卡的IP均为<code>172.31.21.213</code>。在host网络下，容器网络环境和宿主机网络没有任何隔离性，容器和容器之间，容器和宿主机之间的网络通信不存在任何障碍。</p>
+<h2 id="Docker-Bridge-Network-Driver"><a href="#Docker-Bridge-Network-Driver" class="headerlink" title="Docker Bridge Network Driver"></a>Docker Bridge Network Driver</h2><p>容器创建时倘若没有特别指定其他网络驱动，则默认使用的是Bridge 桥接网络驱动。而在docker中，bridge分为系统默认和用户自定义的两种；</p>
+<h3 id="Default-Docker-Bridge-Network"><a href="#Default-Docker-Bridge-Network" class="headerlink" title="Default Docker Bridge Network"></a>Default Docker Bridge Network</h3><p>可以看到上面执行执行docker network ls 时，第一行展示的network<br>就是一个名叫Bridge的Bridge网络驱动。<br>比如启动一个名叫bb-default-bridge的容器，在容器内部，其IP为172.17.0.2</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker run --rm -it --name bb-default-bridge busybox sh</span><br><span class="line">/ # ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02</span><br><span class="line">          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:10 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:828 (828.0 B)  TX bytes:0 (0.0 B)</span><br></pre></td></tr></table></figure>
+
+<p>那如何反映，该容器使用的是默认的Bridge网络驱动呢,docker提供了docker network inspect命令展现使用该网络驱动下的所有容器。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker network inspect bridge</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;bridge&quot;,</span><br><span class="line">        &quot;Id&quot;: &quot;04675183a24d5f702da598aa3fc03c3a68684ff66b45e4c9eddbbf80c94031d7&quot;,</span><br><span class="line">        &quot;Created&quot;: &quot;2020-03-30T14:00:38.974673641Z&quot;,</span><br><span class="line">        &quot;Scope&quot;: &quot;local&quot;,</span><br><span class="line">        &quot;Driver&quot;: &quot;bridge&quot;,</span><br><span class="line">        &quot;EnableIPv6&quot;: false,</span><br><span class="line">        &quot;IPAM&quot;: &#123;</span><br><span class="line">            &quot;Driver&quot;: &quot;default&quot;,</span><br><span class="line">            &quot;Options&quot;: null,</span><br><span class="line">            &quot;Config&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;Subnet&quot;: &quot;172.17.0.0/16&quot;,</span><br><span class="line">                    &quot;Gateway&quot;: &quot;172.17.0.1&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Internal&quot;: false,</span><br><span class="line">        &quot;Attachable&quot;: false,</span><br><span class="line">        &quot;Ingress&quot;: false,</span><br><span class="line">        &quot;ConfigFrom&quot;: &#123;</span><br><span class="line">            &quot;Network&quot;: &quot;&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;ConfigOnly&quot;: false,</span><br><span class="line">        &quot;Containers&quot;: &#123;</span><br><span class="line">            &quot;3af6ea18328e0414ecaac61756ce4e658b24ea89ccd182808a73b424f36ab01d&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;bb-default-bridge&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;6e4cc1b42cd4c0ffd52bfcbe9e69ac4169a3e41a4e013ec5bb9aa30b82ec1ce5&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;02:42:ac:11:00:02&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Options&quot;: &#123;</span><br><span class="line">            &quot;com.docker.network.bridge.default_bridge&quot;: &quot;true&quot;,</span><br><span class="line">            &quot;com.docker.network.bridge.enable_icc&quot;: &quot;true&quot;,</span><br><span class="line">            &quot;com.docker.network.bridge.enable_ip_masquerade&quot;: &quot;true&quot;,</span><br><span class="line">            &quot;com.docker.network.bridge.host_binding_ipv4&quot;: &quot;0.0.0.0&quot;,</span><br><span class="line">            &quot;com.docker.network.bridge.name&quot;: &quot;docker0&quot;,</span><br><span class="line">            &quot;com.docker.network.driver.mtu&quot;: &quot;1500&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Labels&quot;: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>可见，你同时可以发现，在Containers.IPv4Address的内容和容器内获取到的IP是一致的，且com.docker.network.bridge.name所指是网桥名称为docker0。</p>
+<p>实验宿主机的IP为192.168.1.10，那在bb-default-bridge中能不能访问到宿主机呢</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/ # ping 192.168.1.105</span><br><span class="line">PING 192.168.1.105 (192.168.1.105): 56 data bytes</span><br><span class="line">64 bytes from 192.168.1.105: seq=0 ttl=37 time=4.473 ms</span><br><span class="line">64 bytes from 192.168.1.105: seq=1 ttl=37 time=0.773 ms</span><br><span class="line">64 bytes from 192.168.1.105: seq=2 ttl=37 time=1.157 ms</span><br></pre></td></tr></table></figure>
+
+<p>结果发现是可以的，反过来宿主机ping容器则ping不通（是不是有点类似Windows中的NAT网络类型）。如果宿主机需要访问容器时，可以在创建容器时使用 -p 参数将宿主机端口和容器端口映射。<br>假如再创建一个bb-default-bridge-1，依旧使用的是默认的Bridge网络驱动。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">            &quot;3af6ea18328e0414ecaac61756ce4e658b24ea89ccd182808a73b424f36ab01d&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;bb-default-bridge&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;6e4cc1b42cd4c0ffd52bfcbe9e69ac4169a3e41a4e013ec5bb9aa30b82ec1ce5&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;02:42:ac:11:00:02&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;453703548c1416316e776d9dab9a87afb5d006fe23da87ca25416cdad390bffc&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;bb-default-bridge-1&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;e18409cabc6a10510529c8ded1a6c7f0ceba057473585418b36e1c7406e67af7&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;02:42:ac:11:00:03&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br></pre></td></tr></table></figure>
+
+<p>会发现，两者均可以互相ping通。也就说，在同一个宿主机的不同容器之间，使用默认Bridge network driver 是可以通过IP相互访问对方的。</p>
+<h3 id="User-Defined-Bridge-Networks"><a href="#User-Defined-Bridge-Networks" class="headerlink" title="User-Defined Bridge Networks"></a>User-Defined Bridge Networks</h3><p>用户自定的Bridge网络驱动和默认的Bridge网络驱动类似，那么如何创建一个用户自定义的Bridge网络驱动呢。最简单的方法就是docker network create 语句，更多用法可以参照<a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/network/">docker network Command-line reference</a>。<br>比如创建一个叫lazyallen的User-Defined Bridge Network，其中-d是drive的缩写，且是可选项，若不指定默认创建的是Bridge类型的网络驱动。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker network create -d bridge lazyallen</span><br><span class="line">75561be3d1901b8213b795c3c9113392375fe6d57aea2eb1e9b097e2bdc0c0bd</span><br><span class="line">➜  ~ docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">04675183a24d        bridge              bridge              local</span><br><span class="line">245b36b452af        host                host                local</span><br><span class="line">75561be3d190        lazyallen           bridge              local</span><br><span class="line">43a8d2311d38        none                null                local</span><br></pre></td></tr></table></figure>
+<p>可见，的确出现了一个叫lazyallen的Bridge Network。和默认的Bridge网络驱动相比，在用法上的差别就是 User-Defined Bridge Networks 提供了容器间自动的DNS解析。<br>什么意思呢？我们同样创建两个容器，让他们都使用lazyallen Bridge Driver,使用 –network<br> 可指定network driver</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --rm -it --name bb-user-defined-bridge-0 --network lazyallen busybox sh</span><br><span class="line">docker run --rm -it --name bb-user-defined-bridge-1 --network lazyallen busybox sh</span><br></pre></td></tr></table></figure>
+<p>容器在网络通信时，会将容器名直接DNS解析为目标容器IP。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PING bb-user-defined-bridge-0 (172.18.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.176 ms</span><br><span class="line">64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.175 ms</span><br><span class="line">64 bytes from 172.18.0.2: seq=2 ttl=64 time=0.185 ms</span><br></pre></td></tr></table></figure>
+<p>这样最大的好处就是，容器之间不用再使用IP作为hardcode嵌入到配置中，只要使用容器名称作为引用即可，就算因为网络环境导致容器的IP动态变化，也不用再修改配置。</p>
+<p>同样，下面这张图片就可以很好解释Bridge network driver</p>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/2020/04/02/15858380387811.jpg" alt=""></p>
+<h2 id="回过头解释"><a href="#回过头解释" class="headerlink" title="回过头解释"></a>回过头解释</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker network create simple-network</span><br><span class="line"></span><br><span class="line">docker run --name xxl-mysql --network simple-network -e MYSQL_ROOT_PASSWORD=123456 -d mysql </span><br><span class="line"></span><br><span class="line">docker run --network simple-network -e PARAMS=&quot;--spring.datasource.url=jdbc:mysql://xxl-mysql:3306/xxl_job?Unicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false --spring.datasource.password=123456&quot; -p 8080:8080 -v /tmp:/data/applogs --name xxl-job-admin  -d xuxueli/xxl-job-admin:2.1.2</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>通过以上解释，这里就显而易见地做了3件事</p>
+<ul>
+<li>创建了一个叫simple-network的自定义Bridge 网络驱动</li>
+<li>创建两个容器时均指定simple-network网络驱动</li>
+<li>后端应用的配置文件将MySql的地址使用xxl-mysql引用</li>
+</ul>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://docs.docker.com/network/bridge/">Use bridge networks</a></li>
+<li><a target="_blank" rel="noopener" href="https://success.docker.com/article/networking#challengesofnetworkingcontainersandmicroservices">Docker Swarm Reference Architecture: Exploring Scalable, Portable Docker Container Networks</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnkirito.moe/docker-network-bridge/">Docker Network—Bridge 模式</a></li>
+</ul>
+<p>[^cnkirito_footnote]: 引用自文章<a target="_blank" rel="noopener" href="https://www.cnkirito.moe/docker-network-bridge/">「Docker Network—Bridge 模式」</a>的翻译</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/" title="浅析Docker 独立容器的网络通信模式" target="_blank" rel="external">http://yoursite.com/2019/04/17/use-docker-bridge-network-driver/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lazyallen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lazyallen" target="_blank"><span class="text-dark">lazyallen</span><small class="ml-1x">No one</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/08/11/unit-test-littile-share/" title="单元测试:从Junit到Powermock"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/04/10/what-is-ioc/" title="解惑：究竟什么是IOC（控制反转）？"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: 'dFjUZtZHQkj381ud5aooTo7U-gzGzoHsz',
+  appKey: '6s4k8JcIPxZ6u9Dwmw4CrLch'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 's1NTgTtFG2fGcypwMSm6Q6Gi-gzGzoHsz',
+    appKey: 'sfruutrdOr8aDHGb96QGfh94',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
