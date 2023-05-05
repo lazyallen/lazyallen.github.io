@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>记一次unicode编码引发的问题 | Hexo</title>
+  <meta name="description" content="背景遇到的场景是：客户从PDF粘贴一段文字到搜索框，内容是工时规范四个中文字，发现搜不出结果，但是自己手动敲击文字则是正常。请求如下： 12https:&#x2F;&#x2F;xxx?name&#x3D;%E5%B7%A5%E6%97%B6%E8%A7%84%E8%8C%83https:&#x2F;&#x2F;xxx?name&#x3D;%E2%BC%AF%E6%97%B6%E8%A7%84%E8%8C%83 以上链接是URL编码后的结果。 对比得知两者区">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次unicode编码引发的问题">
+<meta property="og:url" content="https://lazyallen.github.io/2023/05/05/unicode-normalization/index.html">
+<meta property="og:site_name" content="Allen">
+<meta property="og:description" content="背景遇到的场景是：客户从PDF粘贴一段文字到搜索框，内容是工时规范四个中文字，发现搜不出结果，但是自己手动敲击文字则是正常。请求如下： 12https:&#x2F;&#x2F;xxx?name&#x3D;%E5%B7%A5%E6%97%B6%E8%A7%84%E8%8C%83https:&#x2F;&#x2F;xxx?name&#x3D;%E2%BC%AF%E6%97%B6%E8%A7%84%E8%8C%83 以上链接是URL编码后的结果。 对比得知两者区">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202305051837254.png">
+<meta property="og:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202305051854104.png">
+<meta property="article:published_time" content="2023-05-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-05T15:58:10.047Z">
+<meta property="article:author" content="Allen Chang">
+<meta property="article:tag" content="Helm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202305051837254.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://lazyallen.github.io/2023/05/05/unicode-normalization/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Allen" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/lazyallen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">lazyallen</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">No one</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shenzhen, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Cloud-Native/">Cloud Native</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SPI/">SPI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%82%E8%B0%88/">杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BA%90%E7%A0%81/">源码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%A7%A3%E6%83%91/">解惑</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bridge/" rel="tag">Bridge</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CICD/" rel="tag">CICD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Dubbo/" rel="tag">Dubbo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Groovy/" rel="tag">Groovy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Helm/" rel="tag">Helm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/" rel="tag">IOC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Network/" rel="tag">Network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/" rel="tag">Spring Boot</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UnitTest/" rel="tag">UnitTest</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" rel="tag">任务调度</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BA%90%E7%A0%81/" rel="tag">源码</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Bridge/" style="font-size: 13px;">Bridge</a> <a href="/tags/CICD/" style="font-size: 13px;">CICD</a> <a href="/tags/Dubbo/" style="font-size: 13px;">Dubbo</a> <a href="/tags/Groovy/" style="font-size: 13px;">Groovy</a> <a href="/tags/Helm/" style="font-size: 14px;">Helm</a> <a href="/tags/IOC/" style="font-size: 13px;">IOC</a> <a href="/tags/Java/" style="font-size: 14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 13px;">Jenkins</a> <a href="/tags/MyBatis/" style="font-size: 13px;">MyBatis</a> <a href="/tags/Network/" style="font-size: 13px;">Network</a> <a href="/tags/Spring-Boot/" style="font-size: 13px;">Spring Boot</a> <a href="/tags/UnitTest/" style="font-size: 13px;">UnitTest</a> <a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" style="font-size: 13px;">任务调度</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 14px;">分布式</a> <a href="/tags/%E6%BA%90%E7%A0%81/" style="font-size: 13px;">源码</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">五月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">二月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Cloud-Native/">Cloud Native</a>
+              </p>
+              <p class="item-title">
+                <a href="/2023/05/05/unicode-normalization/" class="title">记一次unicode编码引发的问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-05-04T16:00:00.000Z" itemprop="datePublished">2023-05-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Cloud-Native/">Cloud Native</a>
+              </p>
+              <p class="item-title">
+                <a href="/2023/02/18/helm-practice/" class="title">Helm工程实践：如何维护一个Helm工程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-02-17T16:00:00.000Z" itemprop="datePublished">2023-02-18</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RPC/">RPC</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/07/dubbo-event-driven-introduction/" class="title">浅析Dubbo的事件驱动机制</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-06T16:00:00.000Z" itemprop="datePublished">2020-11-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/SPI/">SPI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/10/02/java-spi-think/" class="title">解惑：对于SPI的一些理解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-10-01T16:00:00.000Z" itemprop="datePublished">2020-10-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/07/02/jenkins-groovy-script-console/" class="title">Groovy Script Console：如何找出Jenkins中所有授信失效的项目</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-07-01T16:00:00.000Z" itemprop="datePublished">2020-07-02</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF"><span class="toc-number">2.</span> <span class="toc-text">排查思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">3.</span> <span class="toc-text">思路</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%98%AF%E5%90%A6%E6%8F%90%E4%BE%9B%E6%89%A9%E5%B1%95%E7%82%B9%E8%BF%9B%E8%A1%8C%E5%AE%9A%E5%88%B6%E5%8C%96"><span class="toc-number">3.1.</span> <span class="toc-text">是否提供扩展点进行定制化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%87%8D%E6%96%B0%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AARequestParamMethodArgumentResolver"><span class="toc-number">3.2.</span> <span class="toc-text">重新定义一个RequestParamMethodArgumentResolver</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">4.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">引用</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-unicode-normalization" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      记一次unicode编码引发的问题
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/05/05/unicode-normalization/" class="article-date">
+	  <time datetime="2023-05-04T16:00:00.000Z" itemprop="datePublished">2023-05-05</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Cloud-Native/">Cloud Native</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/Helm/" rel="tag">Helm</a>
+  </span>
+
+
+        
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2023/05/05/unicode-normalization/" class="leancloud_visitors"  data-flag-title="记一次unicode编码引发的问题">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/05/05/unicode-normalization/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.8k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 12(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>遇到的场景是：客户从PDF粘贴一段文字到搜索框，内容是<code>工时规范</code>四个中文字，发现搜不出结果，但是自己手动敲击文字则是正常。请求如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">https://xxx?name=%E5%B7%A5%E6%97%B6%E8%A7%84%E8%8C%83</span><br><span class="line">https://xxx?name=%E2%BC%AF%E6%97%B6%E8%A7%84%E8%8C%83</span><br></pre></td></tr></table></figure>
+<p>以上链接是URL编码后的结果。<br><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202305051837254.png" alt=""></p>
+<p>对比得知两者区别在于编码是不一样的，但展示结果看起来是一致的。URL编码是16进制的，区别只有前面几个编码不同，也就是工字。</p>
+<ul>
+<li>E5B7A5</li>
+<li>E2BCAF</li>
+</ul>
+<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a>排查思路</h3><p>遇到的第一个问题是，为什么不同的编码会出现一样的字？<br>通常URL编码对应的是UTF8编码格式，可从<a target="_blank" rel="noopener" href="http://www.mytju.com/classcode/tools/encode_utf8.asp">encode_utf8</a> 网站检索如下。</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>编码10进制</th>
+<th>编码16进制</th>
+<th>Unicode编码10进制</th>
+<th>Unicode编码16进制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工</td>
+<td>15054757</td>
+<td>E5B7A5</td>
+<td>24037</td>
+<td>5DE5</td>
+</tr>
+<tr>
+<td>⼯</td>
+<td>14859439</td>
+<td>E2BCAF</td>
+<td>12079</td>
+<td>2F2F</td>
+</tr>
+</tbody></table>
+<p>对于编码来讲，我的理解就是一组kv集合，key就是编码，v就是值。无论是UTF8还是unicode都是一样的，只是两者范围和大小上有所不同。  </p>
+<p>通过<a target="_blank" rel="noopener" href="https://symbl.cc/en/search/?q=12079">symbl</a>可以通过unicode编码获取对应的字符是什么，也就是get(k)。</p>
+<p><img src="https://lazyallen-blog-1251933423.cos.ap-guangzhou.myqcloud.com/202305051854104.png" alt=""></p>
+<p>可以看到两者的归属是不一样的：</p>
+<ul>
+<li>Kangxi Radicals: 康熙部首</li>
+<li>CJK Unified Ideographs: <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/480184045">中日韩统一表意文字</a></li>
+</ul>
+<p>也就是说，两个工字都是中文，只是一个是部首偏旁，另外一个我们正常使用的汉字。<br>目前有使用ChatGPT辅助我查找问题，当我扔上面两个字符给到ChatGPT时，它告诉我们区别在于是否是全角和半角，于是我开始搜索全角和半角的区别。但显然并不是这个原因，也就是说ChatGPT在回答这种问题时，是会误导用户的。</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>得知问题所在后，就是开始找解决方案了。检索发现unicode是提供 normalization 功能的。我理解解决的就是兼容性的问题，比如两个长得很像字符，不只是中文，其他语言也有类似的问题。在计算机的世界里面，这两者的编码不同，但在人类世界中可能是一致的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; s1 = &#x27;Spicy Jalape\u00f1o&#x27;</span><br><span class="line">&gt;&gt;&gt; s2 = &#x27;Spicy Jalapen\u0303o&#x27;</span><br><span class="line">&gt;&gt;&gt; s1</span><br><span class="line">&#x27;Spicy Jalapeño&#x27;</span><br><span class="line">&gt;&gt;&gt; s2</span><br><span class="line">&#x27;Spicy Jalapeño&#x27;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; import unicodedata</span><br><span class="line">&gt;&gt;&gt; t1 = unicodedata.normalize(&#x27;NFC&#x27;, s1)</span><br><span class="line">&gt;&gt;&gt; t2 = unicodedata.normalize(&#x27;NFC&#x27;, s2)</span><br><span class="line">&gt;&gt;&gt; t1 == t2</span><br><span class="line">True</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对应Java代码也很简单</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Normalizer.normalize(argStr, Normalizer.Form.NFKC);</span><br></pre></td></tr></table></figure>
+
+<p>基本解决方案有了，但如何集成到工程当中呢。工程使用的SpringBoot, Web使用的是Spring MVC。问题是如何把这段逻辑放在工厂中，最简单的方案就是哪个字段有问题就转一下就可以，这样做的问题就是改的多了就是多处存在相同的代码片段。类似这种统一处理的问题，在Spring中最明显就是AOP方案。做一个切面，获取到所有的参数都做一遍规范化处理。这样做当然可以，只是过于简单粗暴了，笔者在想有没有更优雅的方案。<br>那么需要先回答一个问题：Spring是如何帮我们自动把URL编码转成文本的？其实这里应该有两个过程：</p>
+<ul>
+<li>URL编码的二进制流转成文本</li>
+<li>文本绑定到方法的参数上</li>
+</ul>
+<p>在Spring MVC中，实际做这件事的是<code>HandlerMethodArgumentResolver</code>，这个接口有大量的默认实现去解析不同场景下的参数。<br>例如RequestMappingHandlerAdapter#getDefaultArgumentResolvers()</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">private List&lt;HandlerMethodArgumentResolver&gt; getDefaultArgumentResolvers() &#123;</span><br><span class="line">		List&lt;HandlerMethodArgumentResolver&gt; resolvers = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">		// Annotation-based argument resolution</span><br><span class="line">		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));</span><br><span class="line">		resolvers.add(new RequestParamMapMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new PathVariableMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new PathVariableMapMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new MatrixVariableMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new MatrixVariableMapMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new ServletModelAttributeMethodProcessor(false));</span><br><span class="line">		resolvers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(), this.requestResponseBodyAdvice));</span><br><span class="line">		resolvers.add(new RequestPartMethodArgumentResolver(getMessageConverters(), this.requestResponseBodyAdvice));</span><br><span class="line">		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory()));</span><br><span class="line">		resolvers.add(new RequestHeaderMapMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new ServletCookieValueMethodArgumentResolver(getBeanFactory()));</span><br><span class="line">		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));</span><br><span class="line">		resolvers.add(new SessionAttributeMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new RequestAttributeMethodArgumentResolver());</span><br><span class="line"></span><br><span class="line">		// Type-based argument resolution</span><br><span class="line">		resolvers.add(new ServletRequestMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new ServletResponseMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.requestResponseBodyAdvice));</span><br><span class="line">		resolvers.add(new RedirectAttributesMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new ModelMethodProcessor());</span><br><span class="line">		resolvers.add(new MapMethodProcessor());</span><br><span class="line">		resolvers.add(new ErrorsMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new SessionStatusMethodArgumentResolver());</span><br><span class="line">		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());</span><br><span class="line"></span><br><span class="line">		// Custom arguments</span><br><span class="line">		if (getCustomArgumentResolvers() != null) &#123;</span><br><span class="line">			resolvers.addAll(getCustomArgumentResolvers());</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		// Catch-all</span><br><span class="line">		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));</span><br><span class="line">		resolvers.add(new ServletModelAttributeMethodProcessor(true));</span><br><span class="line"></span><br><span class="line">		return resolvers;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>HandlerMethodArgumentResolver 提供两个方法：</p>
+<ul>
+<li>判断是否支持该解析器，返回值是boolean</li>
+<li>实际用来解析的方法，返回的是Object，也就是解析后的值<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">public interface HandlerMethodArgumentResolver &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Whether the given &#123;@linkplain MethodParameter method parameter&#125; is</span><br><span class="line">	 * supported by this resolver.</span><br><span class="line">	 * @param parameter the method parameter to check</span><br><span class="line">	 * @return &#123;@code true&#125; if this resolver supports the supplied parameter;</span><br><span class="line">	 * &#123;@code false&#125; otherwise</span><br><span class="line">	 */</span><br><span class="line">	boolean supportsParameter(MethodParameter parameter);</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Resolves a method parameter into an argument value from a given request.</span><br><span class="line">	 * A &#123;@link ModelAndViewContainer&#125; provides access to the model for the</span><br><span class="line">	 * request. A &#123;@link WebDataBinderFactory&#125; provides a way to create</span><br><span class="line">	 * a &#123;@link WebDataBinder&#125; instance when needed for data binding and</span><br><span class="line">	 * type conversion purposes.</span><br><span class="line">	 * @param parameter the method parameter to resolve. This parameter must</span><br><span class="line">	 * have previously been passed to &#123;@link #supportsParameter&#125; which must</span><br><span class="line">	 * have returned &#123;@code true&#125;.public interface HandlerMethodArgumentResolver &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Whether the given &#123;@linkplain MethodParameter method parameter&#125; is</span><br><span class="line">	 * supported by this resolver.</span><br><span class="line">	 * @param parameter the method parameter to check</span><br><span class="line">	 * @return &#123;@code true&#125; if this resolver supports the supplied parameter;</span><br><span class="line">	 * &#123;@code false&#125; otherwise</span><br><span class="line">	 */</span><br><span class="line">	boolean supportsParameter(MethodParameter parameter);</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Resolves a method parameter into an argument value from a given request.</span><br><span class="line">	 * A &#123;@link ModelAndViewContainer&#125; provides access to the model for the</span><br><span class="line">	 * request. A &#123;@link WebDataBinderFactory&#125; provides a way to create</span><br><span class="line">	 * a &#123;@link WebDataBinder&#125; instance when needed for data binding and</span><br><span class="line">	 * type conversion purposes.</span><br><span class="line">	 * @param parameter the method parameter to resolve. This parameter must</span><br><span class="line">	 * have previously been passed to &#123;@link #supportsParameter&#125; which must</span><br><span class="line">	 * have returned &#123;@code true&#125;.</span><br><span class="line">	 * @param mavContainer the ModelAndViewContainer for the current request</span><br><span class="line">	 * @param webRequest the current request</span><br><span class="line">	 * @param binderFactory a factory for creating &#123;@link WebDataBinder&#125; instances</span><br><span class="line">	 * @return the resolved argument value, or &#123;@code null&#125; if not resolvable</span><br><span class="line">	 * @throws Exception in case of errors with the preparation of argument values</span><br><span class="line">	 */</span><br><span class="line">	@Nullable</span><br><span class="line">	Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,</span><br><span class="line">			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception;</span><br><span class="line"></span><br><span class="line">&#125;public interface HandlerMethodArgumentResolver &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Whether the given &#123;@linkplain MethodParameter method parameter&#125; is</span><br><span class="line">	 * supported by this resolver.</span><br><span class="line">	 * @param parameter the method parameter to check</span><br><span class="line">	 * @return &#123;@code true&#125; if this resolver supports the supplied parameter;</span><br><span class="line">	 * &#123;@code false&#125; otherwise</span><br><span class="line">	 */</span><br><span class="line">	boolean supportsParameter(MethodParameter parameter);</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Resolves a method parameter into an argument value from a given request.</span><br><span class="line">	 * A &#123;@link ModelAndViewContainer&#125; provides access to the model for the</span><br><span class="line">	 * request. A &#123;@link WebDataBinderFactory&#125; provides a way to create</span><br><span class="line">	 * a &#123;@link WebDataBinder&#125; instance when needed for data binding and</span><br><span class="line">	 * type conversion purposes.</span><br><span class="line">	 * @param parameter the method parameter to resolve. This parameter must</span><br><span class="line">	 * have previously been passed to &#123;@link #supportsParameter&#125; which must</span><br><span class="line">	 * have returned &#123;@code true&#125;.</span><br><span class="line">	 * @param mavContainer the ModelAndViewContainer for the current request</span><br><span class="line">	 * @param webRequest the current request</span><br><span class="line">	 * @param binderFactory a factory for creating &#123;@link WebDataBinder&#125; instances</span><br><span class="line">	 * @return the resolved argument value, or &#123;@code null&#125; if not resolvable</span><br><span class="line">	 * @throws Exception in case of errors with the preparation of argument values</span><br><span class="line">	 */</span><br><span class="line">	@Nullable</span><br><span class="line">	Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,</span><br><span class="line">			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">	 * @param mavContainer the ModelAndViewContainer for the current request</span><br><span class="line">	 * @param webRequest the current request</span><br><span class="line">	 * @param binderFactory a factory for creating &#123;@link WebDataBinder&#125; instances</span><br><span class="line">	 * @return the resolved argument value, or &#123;@code null&#125; if not resolvable</span><br><span class="line">	 * @throws Exception in case of errors with the preparation of argument values</span><br><span class="line">	 */</span><br><span class="line">	@Nullable</span><br><span class="line">	Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,</span><br><span class="line">			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>很明显，<code>@RequestParam</code> 注解对应的类就是<code>RequestParamMethodArgumentResolver</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception &#123;</span><br><span class="line">		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);</span><br><span class="line"></span><br><span class="line">		if (servletRequest != null) &#123;</span><br><span class="line">			Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);</span><br><span class="line">			if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) &#123;</span><br><span class="line">				return mpArg;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		Object arg = null;</span><br><span class="line">		MultipartRequest multipartRequest = request.getNativeRequest(MultipartRequest.class);</span><br><span class="line">		if (multipartRequest != null) &#123;</span><br><span class="line">			List&lt;MultipartFile&gt; files = multipartRequest.getFiles(name);</span><br><span class="line">			if (!files.isEmpty()) &#123;</span><br><span class="line">				arg = (files.size() == 1 ? files.get(0) : files);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		if (arg == null) &#123;</span><br><span class="line">			String[] paramValues = request.getParameterValues(name);</span><br><span class="line">			if (paramValues != null) &#123;</span><br><span class="line">				arg = (paramValues.length == 1 ? paramValues[0] : paramValues);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return arg;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>简单看其中逻辑可见，最后是通过<code>request.getParameterValues(name);</code>获取到实际的值，这里跟下去的话就到了tomcat那层的代码。<br>笔者在思考是否有什么类似于编码的参数，可以用于配置编码这个流程，实际找到有<code>HttpProperties</code>这个配置类，但其中只是对于编码类型的配置，不涉及normalization的部分。<br>现在目标就是如何增强<code>RequestParamMethodArgumentResolver</code>，使其有规范化的能力。思路只有在<code>RequestParamMethodArgumentResolver</code>本身动手。    </p>
+<h4 id="是否提供扩展点进行定制化"><a href="#是否提供扩展点进行定制化" class="headerlink" title="是否提供扩展点进行定制化"></a>是否提供扩展点进行定制化</h4><p>简单阅读代码发现，该类还继承<code>AbstractNamedValueMethodArgumentResolver</code>，该类有一个方法<code>handleResolvedValue</code>,签名如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Invoked after a value is resolved.</span><br><span class="line"> * @param arg the resolved argument value</span><br><span class="line"> * @param name the argument name</span><br><span class="line"> * @param parameter the argument parameter type</span><br><span class="line"> * @param mavContainer the &#123;@link ModelAndViewContainer&#125; (may be &#123;@code null&#125;)</span><br><span class="line"> * @param webRequest the current request</span><br><span class="line"> */</span><br><span class="line">protected void handleResolvedValue(@Nullable Object arg, String name, MethodParameter parameter,</span><br><span class="line">		@Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest) &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这个可以看作一个扩展点，但很无奈的是，这个只是一个void方法，Java是值传递，而且String时不可变的，所以就算重写这个方法也没办法对返回新的arg。</p>
+<h4 id="重新定义一个RequestParamMethodArgumentResolver"><a href="#重新定义一个RequestParamMethodArgumentResolver" class="headerlink" title="重新定义一个RequestParamMethodArgumentResolver"></a>重新定义一个RequestParamMethodArgumentResolver</h4><p>要解决两个问题</p>
+<ul>
+<li>重新定义RequestParamMethodArgumentResolver，并且重写<code>resolveName</code>方法。</li>
+<li>如何覆盖默认的RequestParamMethodArgumentResolver</li>
+</ul>
+<p>简单实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public class RequestParamMethodNormalizedArgumentResolver extends RequestParamMethodArgumentResolver &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	public RequestParamMethodNormalizedArgumentResolver(boolean useDefaultResolution) &#123;</span><br><span class="line">		super(useDefaultResolution);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public RequestParamMethodNormalizedArgumentResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) &#123;</span><br><span class="line">		super(beanFactory, useDefaultResolution);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	@Override</span><br><span class="line">	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception &#123;</span><br><span class="line">		Object arg = super.resolveName(name, parameter, request);</span><br><span class="line">		// 对参数进行NFKC规范化</span><br><span class="line">		if (Objects.nonNull(arg) &amp;&amp; arg instanceof String ) &#123;</span><br><span class="line">			String argStr = String.valueOf(arg);</span><br><span class="line">			if(StringUtils.isNotEmpty(argStr))&#123;</span><br><span class="line">				arg = Normalizer.normalize(argStr, Normalizer.Form.NFKC);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return arg;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于第二个问题，根据上面<code>getDefaultArgumentResolvers</code>方法可知，其顺序是hardcode的。只要在合适时间去set这个list就可以。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">public class WebMvcConfig extends WebMvcConfigurationSupport implements BeanFactoryAware, InitializingBean &#123;</span><br><span class="line">    @Nullable</span><br><span class="line">    private ConfigurableBeanFactory beanFactory;</span><br><span class="line"></span><br><span class="line">    @Autowired</span><br><span class="line">    private RequestMappingHandlerAdapter requestMappingHandlerAdapter;</span><br><span class="line">    @Override</span><br><span class="line">    public void setBeanFactory(BeanFactory beanFactory) throws BeansException &#123;</span><br><span class="line">        if (beanFactory instanceof ConfigurableBeanFactory) &#123;</span><br><span class="line">            this.beanFactory = (ConfigurableBeanFactory) beanFactory;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void afterPropertiesSet() &#123;</span><br><span class="line">        List&lt;HandlerMethodArgumentResolver&gt; argumentResolvers = requestMappingHandlerAdapter.getArgumentResolvers();</span><br><span class="line">        List&lt;HandlerMethodArgumentResolver&gt; newArgumentResolvers = new LinkedList&lt;&gt;();</span><br><span class="line">        newArgumentResolvers.add(new RequestParamMethodNormalizedArgumentResolver(this.beanFactory,false));</span><br><span class="line">        newArgumentResolvers.addAll(argumentResolvers);</span><br><span class="line">        requestMappingHandlerAdapter.setArgumentResolvers(Collections.unmodifiableList(newArgumentResolvers));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>对于第2个问题，我同时也让ChatGPT提供了一段代码，发现其只是用来增加自定义的Resolver，顺序依旧在默认实现后面。其实ChatGPT的话不能全信，只能信一部份，作为提供思路的辅助，其提供的代码并不一定就能直接使用。<br>到现在，对于URL的Query参数的normalization完成了。<br>当然这只是解决Query参数的场景，对于Body里面的参数，甚至Header，Path里面的参数，要考虑的话都需要去考虑。<br>实际上，笔者认为如果前端提交请求之前，做了normalization处理的话，就能从源头上避免大部份的问题。</p>
+<h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>事后有两个感想：</p>
+<ul>
+<li>也许这个只是一个伪问题：因为用户的确提交的字符本身就是「错」的，只是这两个字符长得很像而已。是否有必要帮助用户去规范化字符，也许体验上会好很多，毕竟在实际使用中，很少人真的会搜寻部首。笔者的疑问是，对于一个错误的输入，是否应该返回一个对的输出？其实这个抉择在方案设计时经常会碰到，所谓的优化会不会去掩盖掉「错误」？笔者个人觉得，其实不应该返回对的输出。</li>
+<li>ChatGPT的作用没有想象中那么大，其给出的回答可以作为参考方向，因为有可能回答部份都是错的。对于开发而言，依旧需要依托自己的经验，去不断提问题，探究问题的本质，整理思路，不断摸索，千万不能完全依托ChatGPT的回答。</li>
+</ul>
+<h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://symbl.cc/en/unicode/blocks/cjk-unified-ideographs/">symbl.cc</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.mytju.com/classcode/tools/encode_utf8.asp">mytju.com</a></li>
+<li><a target="_blank" rel="noopener" href="https://xobo.org/unicode-normalization-nfd-nfc-nfkd-nfkc/">从⽅不是方到Unicode正规化NFD, NFC, NFKD, NFKC
+</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/480184045">中文和日文里长得一样的字在计算机中是不是同一个字？
+</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://lazyallen.github.io/2023/05/05/unicode-normalization/" title="记一次unicode编码引发的问题" target="_blank" rel="external">https://lazyallen.github.io/2023/05/05/unicode-normalization/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/lazyallen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/lazyallen" target="_blank"><span class="text-dark">lazyallen</span><small class="ml-1x">No one</small></a></h3>
+        <div></div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2023/02/18/helm-practice/" title="Helm工程实践：如何维护一个Helm工程"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/lazyallen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: 'dFjUZtZHQkj381ud5aooTo7U-gzGzoHsz',
+  appKey: '6s4k8JcIPxZ6u9Dwmw4CrLch'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 's1NTgTtFG2fGcypwMSm6Q6Gi-gzGzoHsz',
+    appKey: 'sfruutrdOr8aDHGb96QGfh94',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
